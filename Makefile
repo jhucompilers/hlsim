@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -g -Wall -std=c++20 -Iinclude
 
-SRCS = main.cpp operand.cpp
+SRCS = main.cpp operand.cpp opcode.cpp instruction.cpp
 OBJS = $(SRCS:%.cpp=build/%.o)
 
 build/%.o : src/%.cpp
