@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS = -g -Wall -std=c++20 -Iinclude -Igensrc
 
 SRCS = main.cpp operand.cpp opcode.cpp instruction.cpp \
-	lexer.cpp
+	lexer.cpp parser.cpp
 OBJS = $(SRCS:%.cpp=build/%.o)
 
 GENSRCS = leximpl.cpp
