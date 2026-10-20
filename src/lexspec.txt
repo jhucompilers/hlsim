@@ -5,6 +5,9 @@
 TokenKind::GLOBL
 \.(globl|global)
 
+TokenKind::SECTION
+\.section
+
 TokenKind::VREG
 vr[0-9]+
 

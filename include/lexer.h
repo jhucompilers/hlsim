@@ -8,6 +8,7 @@
 enum class TokenKind {
   INVALID,
   GLOBL,
+  SECTION,
   VREG,
   IDENT,
   COMMA,
@@ -23,7 +24,7 @@ private:
   std::string m_lexeme;
 
 public:
-  Token( TokenKind kind, const std::string &lexeme = "" );
+  Token( TokenKind kind = TokenKind::INVALID, const std::string &lexeme = "" );
   Token( const Token &other );
   ~Token();
 

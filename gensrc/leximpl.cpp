@@ -17,7 +17,7 @@ static const struct yylex_charclass yylex_cclass_0 = {
   { 0x0, 0x0, 0x87fffffe, 0x7bffffe, }
 };
 static const struct yylex_charclass yylex_cclass_1 = {
-  { 0x0, 0x3ff4000, 0x87fffffe, 0x7ffff7e, }
+  { 0x0, 0x3ff4000, 0x87fffffe, 0x7f7ff7e, }
 };
 static const struct yylex_charclass yylex_cclass_2 = {
   { 0x0, 0x3ff4000, 0x87fffffe, 0x7fffffe, }
@@ -32,12 +32,27 @@ static const struct yylex_charclass yylex_cclass_5 = {
   { 0x0, 0x3ff4000, 0x87fffffe, 0x7ffeffe, }
 };
 static const struct yylex_charclass yylex_cclass_6 = {
-  { 0x0, 0x3ff4000, 0x87fffffe, 0x7ff7ffe, }
+  { 0x0, 0x3ff4000, 0x87fffffe, 0x7ffffde, }
 };
 static const struct yylex_charclass yylex_cclass_7 = {
-  { 0x0, 0x3ff4000, 0x87fffffe, 0x7fffffa, }
+  { 0x0, 0x3ff4000, 0x87fffffe, 0x7fffff6, }
 };
 static const struct yylex_charclass yylex_cclass_8 = {
+  { 0x0, 0x3ff4000, 0x87fffffe, 0x7effffe, }
+};
+static const struct yylex_charclass yylex_cclass_9 = {
+  { 0x0, 0x3ff4000, 0x87fffffe, 0x7fffdfe, }
+};
+static const struct yylex_charclass yylex_cclass_10 = {
+  { 0x0, 0x3ff4000, 0x87fffffe, 0x7ff7ffe, }
+};
+static const struct yylex_charclass yylex_cclass_11 = {
+  { 0x0, 0x3ff4000, 0x87fffffe, 0x7ffbffe, }
+};
+static const struct yylex_charclass yylex_cclass_12 = {
+  { 0x0, 0x3ff4000, 0x87fffffe, 0x7fffffa, }
+};
+static const struct yylex_charclass yylex_cclass_13 = {
   { 0x0, 0x3ff4000, 0x87fffffe, 0x7ffeffc, }
 };
 
@@ -77,6 +92,13 @@ static const int yylex_final_state_to_token_type[] = {
   (int) TokenKind::IDENT,
   (int) TokenKind::IDENT,
   (int) TokenKind::IDENT,
+  (int) TokenKind::IDENT,
+  (int) TokenKind::IDENT,
+  (int) TokenKind::SECTION,
+  (int) TokenKind::IDENT,
+  (int) TokenKind::IDENT,
+  (int) TokenKind::IDENT,
+  (int) TokenKind::IDENT,
   (int) TokenKind::GLOBL,
   (int) TokenKind::GLOBL,
   (int) TokenKind::IMMEDIATE,
@@ -99,13 +121,15 @@ static int yylex(LEXER_TYPE lexer, LEXEME_BUF_TYPE lexeme_buf) {
       break;
     case 1:
       if (isdigit(c))
-        next_state = 19;
+        next_state = 26;
       break;
     case 5:
       if (yylex_is_member(&yylex_cclass_1, c))
         next_state = 9;
       else if (c == 'g')
         next_state = 12;
+      else if (c == 's')
+        next_state = 13;
       break;
     case 7:
       if (yylex_is_member(&yylex_cclass_2, c))
@@ -137,45 +161,85 @@ static int yylex(LEXER_TYPE lexer, LEXEME_BUF_TYPE lexeme_buf) {
       if (yylex_is_member(&yylex_cclass_5, c))
         next_state = 9;
       else if (c == 'l')
-        next_state = 13;
+        next_state = 20;
       break;
     case 13:
       if (yylex_is_member(&yylex_cclass_6, c))
         next_state = 9;
-      else if (c == 'o')
+      else if (c == 'e')
         next_state = 14;
       break;
     case 14:
       if (yylex_is_member(&yylex_cclass_7, c))
         next_state = 9;
-      else if (c == 'b')
+      else if (c == 'c')
         next_state = 15;
       break;
     case 15:
       if (yylex_is_member(&yylex_cclass_8, c))
         next_state = 9;
-      else if (c == 'a')
+      else if (c == 't')
         next_state = 16;
-      else if (c == 'l')
-        next_state = 17;
       break;
     case 16:
+      if (yylex_is_member(&yylex_cclass_9, c))
+        next_state = 9;
+      else if (c == 'i')
+        next_state = 17;
+      break;
+    case 17:
+      if (yylex_is_member(&yylex_cclass_10, c))
+        next_state = 9;
+      else if (c == 'o')
+        next_state = 18;
+      break;
+    case 18:
+      if (yylex_is_member(&yylex_cclass_11, c))
+        next_state = 9;
+      else if (c == 'n')
+        next_state = 19;
+      break;
+    case 19:
+      if (yylex_is_member(&yylex_cclass_2, c))
+        next_state = 9;
+      break;
+    case 20:
+      if (yylex_is_member(&yylex_cclass_10, c))
+        next_state = 9;
+      else if (c == 'o')
+        next_state = 21;
+      break;
+    case 21:
+      if (yylex_is_member(&yylex_cclass_12, c))
+        next_state = 9;
+      else if (c == 'b')
+        next_state = 22;
+      break;
+    case 22:
+      if (yylex_is_member(&yylex_cclass_13, c))
+        next_state = 9;
+      else if (c == 'a')
+        next_state = 23;
+      else if (c == 'l')
+        next_state = 24;
+      break;
+    case 23:
       if (yylex_is_member(&yylex_cclass_5, c))
         next_state = 9;
       else if (c == 'l')
-        next_state = 18;
+        next_state = 25;
       break;
-    case 17:
+    case 24:
       if (yylex_is_member(&yylex_cclass_2, c))
         next_state = 9;
       break;
-    case 18:
+    case 25:
       if (yylex_is_member(&yylex_cclass_2, c))
         next_state = 9;
       break;
-    case 19:
+    case 26:
       if (isdigit(c))
-        next_state = 19;
+        next_state = 26;
       break;
     } // end switch
     if (((int8_t) next_state) == -1) {

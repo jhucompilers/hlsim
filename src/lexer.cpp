@@ -150,6 +150,9 @@ bool Lexer::fill() {
   if ( lexbuf.n > LEXER_MAX_TOK_LEN )
     throw std::runtime_error( "Max token length exceeded" );
 
+  // NUL-terminate the lexeme string
+  lexbuf.buf[ lexbuf.n ] = '\0';
+
   // We have a valid token
   m_next = Token( TokenKind( rc ), std::string( lexbuf.buf ) );
   return true;
