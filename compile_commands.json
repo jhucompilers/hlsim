@@ -30,5 +30,37 @@
     "directory": "/home/daveho/git/hlsim",
     "file": "/home/daveho/git/hlsim/src/operand.cpp",
     "output": "/home/daveho/git/hlsim/build/operand.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-std=c++20",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "build/opcode.o",
+      "src/opcode.cpp"
+    ],
+    "directory": "/home/daveho/git/hlsim",
+    "file": "/home/daveho/git/hlsim/src/opcode.cpp",
+    "output": "/home/daveho/git/hlsim/build/opcode.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-std=c++20",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "build/instruction.o",
+      "src/instruction.cpp"
+    ],
+    "directory": "/home/daveho/git/hlsim",
+    "file": "/home/daveho/git/hlsim/src/instruction.cpp",
+    "output": "/home/daveho/git/hlsim/build/instruction.o"
   }
 ]
