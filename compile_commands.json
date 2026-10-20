@@ -1,0 +1,34 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-std=c++20",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "build/main.o",
+      "src/main.cpp"
+    ],
+    "directory": "/home/daveho/git/hlsim",
+    "file": "/home/daveho/git/hlsim/src/main.cpp",
+    "output": "/home/daveho/git/hlsim/build/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-std=c++20",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "build/operand.o",
+      "src/operand.cpp"
+    ],
+    "directory": "/home/daveho/git/hlsim",
+    "file": "/home/daveho/git/hlsim/src/operand.cpp",
+    "output": "/home/daveho/git/hlsim/build/operand.o"
+  }
+]
