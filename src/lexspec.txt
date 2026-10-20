@@ -1,0 +1,30 @@
+# Lexical analyzer specification for the high-level IR
+# assembly language. Note that comments and whitespace
+# are handled separately by the lexer implementation.
+
+TokenKind::GLOBL
+\.(globl|global)
+
+TokenKind::VREG
+vr[0-9]+
+
+# Note that IDENT includes ordinary identifiers (e.g., names
+# of functions), but also includes labels and instruction
+# mnemonics.
+TokenKind::IDENT
+[A-Za-z\._][A-Za-z\._0-9]*
+
+TokenKind::COMMA
+\,
+
+TokenKind::COLON
+\:
+
+TokenKind::LPAREN
+\(
+
+TokenKind::RPAREN
+\)
+
+TokenKind::IMMEDIATE
+\$[0-9]+
