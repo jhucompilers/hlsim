@@ -145,7 +145,5 @@ const std::unordered_map< std::string, Opcode > s_opcodes = {
 
 Opcode opcode_from_s( const std::string &s ) {
   auto i = s_opcodes.find( s );
-  if ( i == s_opcodes.end() )
-    throw std::runtime_error( "No such opcode: " + s );
-  return i->second;
+  return ( i == s_opcodes.end() ) ? Opcode::INVALID : i->second;
 }

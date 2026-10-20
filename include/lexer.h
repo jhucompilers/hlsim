@@ -11,6 +11,7 @@ enum class TokenKind {
   SECTION,
   VREG,
   IDENT,
+  OPCODE, // used for identifiers which are valid mnemonics
   COMMA,
   COLON,
   LPAREN,

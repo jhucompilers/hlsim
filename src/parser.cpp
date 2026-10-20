@@ -10,8 +10,8 @@
 //   Function -> '.globl' ident ident ':' InsList
 //   InsList -> Ins
 //   InsList -> Ins InsList
-//   Ins -> ident OperandList
-//   Ins -> ident ': ident OperandList
+//   Ins -> opcode OperandList
+//   Ins -> ident ': opcode OperandList
 //   OperandList -> Operand
 //   OperandList -> Operand ',' OperandList
 //   Operand -> vreg
@@ -92,30 +92,22 @@ void Parser::parse_InsList() {
 }
 
 void Parser::parse_Ins() {
-  // Ins -> ident OperandList
-  // Ins -> ident ': ident OperandList
+  // Ins -> opecode OperandList
+  // Ins -> ident ': opcode OperandList
 
-  Token first, second;
   std::string label;
 
-  Token mnemonic;
-
-  expect( TokenKind::IDENT, first );
-  if ( !m_lexer.peek( second ) )
-    throw std::runtime_error( "Unexpected EOF in instruction" );
-  if ( second.get_kind() == TokenKind::COLON ) {
-    // We have a label
-    label = first.get_lexeme();
-
-    // Consume the ':'
-    m_lexer.next( second );
-
-    // Get the actual mnemonic
-    expect( TokenKind::IDENT, mnemonic );
-  } else {
-    // This instruction is not labeled
-    mnemonic = first;
+  Token tok;
+  m_lexer.next( tok );
+  if ( tok.get_kind() == TokenKind::IDENT ) {
+    // there is a label
+    label = tok.get_lexeme();
+    expect( TokenKind::COLON, tok );
+    m_lexer.next( tok );
   }
+
+  if ( tok.get_kind() != TokenKind::OPCODE )
+    throw std::runtime_error( "expected opcode" );
 
   parse_OperandList();
 }

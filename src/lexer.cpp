@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cctype>
 #include "lexer.h"
+#include "opcode.h"
 
 Token::Token( TokenKind kind, const std::string &lexeme )
   : m_kind( kind )
@@ -153,8 +154,17 @@ bool Lexer::fill() {
   // NUL-terminate the lexeme string
   lexbuf.buf[ lexbuf.n ] = '\0';
 
+  // As a special case, if the token is an IDENT whose
+  // lexeme matches an instruction mnemonic, change its
+  // kind to be OPCODE
+  if ( TokenKind( rc ) == TokenKind::IDENT &&
+       opcode_from_s( lexbuf.buf ) != Opcode::INVALID )
+    rc = int( TokenKind::OPCODE );
+
   // We have a valid token
   m_next = Token( TokenKind( rc ), std::string( lexbuf.buf ) );
+
+
   return true;
 }
 

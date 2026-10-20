@@ -4,6 +4,7 @@
 #include <string>
 
 enum class Opcode {
+  INVALID, // used by opcode_from_s to indicate string isn't a valid mnemonic
   HINS_nop,
   HINS_add_b,
   HINS_add_w,
