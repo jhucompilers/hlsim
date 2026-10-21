@@ -6,14 +6,15 @@
       "-Wall",
       "-std=c++20",
       "-Iinclude",
+      "-Igensrc",
       "-c",
       "-o",
       "build/main.o",
       "src/main.cpp"
     ],
-    "directory": "/home/daveho/git/hlsim",
-    "file": "/home/daveho/git/hlsim/src/main.cpp",
-    "output": "/home/daveho/git/hlsim/build/main.o"
+    "directory": "/space/daveho/git/hlsim",
+    "file": "/space/daveho/git/hlsim/src/main.cpp",
+    "output": "/space/daveho/git/hlsim/build/main.o"
   },
   {
     "arguments": [
@@ -22,14 +23,15 @@
       "-Wall",
       "-std=c++20",
       "-Iinclude",
+      "-Igensrc",
       "-c",
       "-o",
       "build/operand.o",
       "src/operand.cpp"
     ],
-    "directory": "/home/daveho/git/hlsim",
-    "file": "/home/daveho/git/hlsim/src/operand.cpp",
-    "output": "/home/daveho/git/hlsim/build/operand.o"
+    "directory": "/space/daveho/git/hlsim",
+    "file": "/space/daveho/git/hlsim/src/operand.cpp",
+    "output": "/space/daveho/git/hlsim/build/operand.o"
   },
   {
     "arguments": [
@@ -38,14 +40,15 @@
       "-Wall",
       "-std=c++20",
       "-Iinclude",
+      "-Igensrc",
       "-c",
       "-o",
       "build/opcode.o",
       "src/opcode.cpp"
     ],
-    "directory": "/home/daveho/git/hlsim",
-    "file": "/home/daveho/git/hlsim/src/opcode.cpp",
-    "output": "/home/daveho/git/hlsim/build/opcode.o"
+    "directory": "/space/daveho/git/hlsim",
+    "file": "/space/daveho/git/hlsim/src/opcode.cpp",
+    "output": "/space/daveho/git/hlsim/build/opcode.o"
   },
   {
     "arguments": [
@@ -54,13 +57,82 @@
       "-Wall",
       "-std=c++20",
       "-Iinclude",
+      "-Igensrc",
       "-c",
       "-o",
       "build/instruction.o",
       "src/instruction.cpp"
     ],
-    "directory": "/home/daveho/git/hlsim",
-    "file": "/home/daveho/git/hlsim/src/instruction.cpp",
-    "output": "/home/daveho/git/hlsim/build/instruction.o"
+    "directory": "/space/daveho/git/hlsim",
+    "file": "/space/daveho/git/hlsim/src/instruction.cpp",
+    "output": "/space/daveho/git/hlsim/build/instruction.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-std=c++20",
+      "-Iinclude",
+      "-Igensrc",
+      "-c",
+      "-o",
+      "build/lexer.o",
+      "src/lexer.cpp"
+    ],
+    "directory": "/space/daveho/git/hlsim",
+    "file": "/space/daveho/git/hlsim/src/lexer.cpp",
+    "output": "/space/daveho/git/hlsim/build/lexer.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-std=c++20",
+      "-Iinclude",
+      "-Igensrc",
+      "-c",
+      "-o",
+      "build/parser.o",
+      "src/parser.cpp"
+    ],
+    "directory": "/space/daveho/git/hlsim",
+    "file": "/space/daveho/git/hlsim/src/parser.cpp",
+    "output": "/space/daveho/git/hlsim/build/parser.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-std=c++20",
+      "-Iinclude",
+      "-Igensrc",
+      "-c",
+      "-o",
+      "build/location.o",
+      "src/location.cpp"
+    ],
+    "directory": "/space/daveho/git/hlsim",
+    "file": "/space/daveho/git/hlsim/src/location.cpp",
+    "output": "/space/daveho/git/hlsim/build/location.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-std=c++20",
+      "-Iinclude",
+      "-Igensrc",
+      "-c",
+      "-o",
+      "build/exceptions.o",
+      "src/exceptions.cpp"
+    ],
+    "directory": "/space/daveho/git/hlsim",
+    "file": "/space/daveho/git/hlsim/src/exceptions.cpp",
+    "output": "/space/daveho/git/hlsim/build/exceptions.o"
   }
 ]
