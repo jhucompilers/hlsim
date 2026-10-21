@@ -26,6 +26,7 @@ private:
   void parse_OptGlobal();
   void parse_InsList();
   void parse_Ins();
+  void parse_OptOperandList();
   void parse_OperandList();
   void parse_Operand();
 

@@ -1,3 +1,4 @@
+#include <set>
 #include "parser.h"
 #include "lexer.h"
 #include "exceptions.h"
@@ -11,8 +12,10 @@
 //   Function -> '.globl' ident ident ':' InsList
 //   InsList -> Ins
 //   InsList -> Ins InsList
-//   Ins -> opcode OperandList
-//   Ins -> ident ': opcode OperandList
+//   Ins -> opcode OptOperandList
+//   Ins -> ident ': opcode OptOperandList
+//   OptOperandList -> OperandList
+//   OptOperandList -> ε
 //   OperandList -> Operand
 //   OperandList -> Operand ',' OperandList
 //   Operand -> vreg
@@ -93,8 +96,8 @@ void Parser::parse_InsList() {
 }
 
 void Parser::parse_Ins() {
-  // Ins -> opecode OperandList
-  // Ins -> ident ': opcode OperandList
+  // Ins -> opcode OptOperandList
+  // Ins -> ident ': opcode OptOperandList
 
   std::string label;
 
@@ -110,7 +113,26 @@ void Parser::parse_Ins() {
   if ( tok.get_kind() != TokenKind::OPCODE )
     throw SimError( "expected opcode", tok.get_loc() );
 
-  parse_OperandList();
+  parse_OptOperandList();
+}
+
+void Parser::parse_OptOperandList() {
+  // OptOperandList -> OperandList
+  // OptOperandList -> ε
+
+  // FIRST(OperandList) = { vreg, '(', imm, ident }
+  static const std::set< TokenKind > first_OperandList = {
+    TokenKind::VREG,
+    TokenKind::LPAREN,
+    TokenKind::IMMEDIATE,
+    TokenKind::IDENT
+  };
+
+  Token tok;
+  if ( m_lexer.peek( tok ) &&
+       first_OperandList.find( tok.get_kind() ) != first_OperandList.end() ) {
+    parse_OperandList();
+  }
 }
 
 void Parser::parse_OperandList() {
