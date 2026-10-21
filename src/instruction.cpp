@@ -1,5 +1,5 @@
+#include <cassert>
 #include "instruction.h"
-#include <stdexcept>
 
 Instruction::Instruction( Opcode opcode )
   : m_opcode( opcode ) {
@@ -39,7 +39,6 @@ int Instruction::get_num_operands() const {
 }
 
 const Operand &Instruction::operator[]( size_t i ) const {
-  if ( i >= m_operands.size() )
-    throw std::runtime_error( "Operand index is out of bounds" );
+  assert( i < m_operands.size() );
   return m_operands[ i ];
 }

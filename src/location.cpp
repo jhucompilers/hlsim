@@ -34,6 +34,10 @@ Location &Location::operator=( const Location &rhs ) {
   return *this;
 }
 
+bool Location::is_valid() const {
+  return m_line >= 1;
+}
+
 const std::string &Location::get_filename() const {
   return m_filename;
 }

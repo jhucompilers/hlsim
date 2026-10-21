@@ -16,6 +16,7 @@ public:
 
   Location &operator=( const Location &rhs );
 
+  bool is_valid() const;
   const std::string &get_filename() const;
   int get_line() const;
   int get_col() const;

@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "lexer.h"
+#include "exceptions.h"
 
 // Grammar
 //   Unit -> TItem
@@ -42,7 +43,7 @@ void Parser::parse_Unit() {
 void Parser::parse_TItem() {
   Token tok;
   if ( !m_lexer.peek( tok ) )
-    throw std::runtime_error( "Unexpected EOF looking for top-level item" );
+    throw SimError( "Unexpected EOF looking for top-level item", m_lexer.get_loc() );
   if ( tok.get_kind() == TokenKind::SECTION ) {
     parse_Section();
     return;
@@ -107,7 +108,7 @@ void Parser::parse_Ins() {
   }
 
   if ( tok.get_kind() != TokenKind::OPCODE )
-    throw std::runtime_error( "expected opcode" );
+    throw SimError( "expected opcode", tok.get_loc() );
 
   parse_OperandList();
 }
@@ -132,7 +133,7 @@ void Parser::parse_Operand() {
 
   Token tok;
   if ( !m_lexer.peek( tok ) )
-    throw std::runtime_error( "unexpected EOF parsing operand" );
+    throw SimError( "unexpected EOF parsing operand", m_lexer.get_loc() );
 
   if ( tok.get_kind() == TokenKind::VREG ) {
     // is a virtual register
@@ -154,5 +155,5 @@ void Parser::parse_Operand() {
 void Parser::expect( TokenKind kind, Token &tok ) {
   m_lexer.next( tok );
   if ( tok.get_kind() != kind )
-    throw std::runtime_error( "Unexpected token" );
+    throw SimError( "Unexpected token", tok.get_loc() );
 }

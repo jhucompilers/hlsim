@@ -3,6 +3,7 @@
 #include <cctype>
 #include "lexer.h"
 #include "opcode.h"
+#include "exceptions.h"
 
 Token::Token( TokenKind kind, const Location &loc, const std::string &lexeme )
   : m_kind( kind )
@@ -13,7 +14,8 @@ Token::Token( TokenKind kind, const Location &loc, const std::string &lexeme )
 
 Token::Token( const Token &other )
   : m_kind( other.m_kind )
-  , m_lexeme( other.m_lexeme ) {
+  , m_lexeme( other.m_lexeme )
+  , m_loc( other.m_loc ) {
 
 }
 
@@ -25,6 +27,7 @@ Token &Token::operator=( const Token &rhs ) {
   if ( this != &rhs ) {
     m_kind = rhs.m_kind;
     m_lexeme = rhs.m_lexeme;
+    m_loc = rhs.m_loc;
   }
   return *this;
 }
@@ -101,7 +104,7 @@ bool Lexer::peek( Token &tok ) {
 
 void Lexer::next( Token &tok ) {
   if ( !fill() )
-    throw std::runtime_error( "Unexpected end of input" );
+    throw SimError( "Unexpected end of input", m_loc );
   tok = m_next;
   m_next = Token( TokenKind::INVALID );
 }
@@ -168,9 +171,9 @@ bool Lexer::fill() {
   struct LexemeBuf lexbuf;
   int rc = yylex( this, &lexbuf );
   if ( rc < 0 )
-    throw std::runtime_error( "Invalid token" );
+    throw SimError( "Invalid token", loc );
   if ( lexbuf.n > LEXER_MAX_TOK_LEN )
-    throw std::runtime_error( "Max token length exceeded" );
+    throw SimError( "Max token length exceeded", loc );
 
   // NUL-terminate the lexeme string
   lexbuf.buf[ lexbuf.n ] = '\0';
@@ -221,7 +224,7 @@ bool Lexer::skip_ws_or_comment() {
     for (;;) {
       c = get();
       if ( c < 0 )
-        throw std::runtime_error( "EOF while reading comment" );
+        throw SimError( "EOF while reading comment", m_loc );
       if ( last_was_asterisk && c == '/' )
         return true; // skipped a comment
       last_was_asterisk = ( c == '*' );
