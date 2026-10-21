@@ -3,7 +3,7 @@
 #include "parser.h"
 
 int main( int argc, char **argv ) {
-  Lexer lexer( std::cin );
+  Lexer lexer( std::cin, "<stdin>" );
   Token tok;
 
   /*

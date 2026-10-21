@@ -4,9 +4,10 @@
 #include "lexer.h"
 #include "opcode.h"
 
-Token::Token( TokenKind kind, const std::string &lexeme )
+Token::Token( TokenKind kind, const Location &loc, const std::string &lexeme )
   : m_kind( kind )
-  , m_lexeme( lexeme ) {
+  , m_lexeme( lexeme )
+  , m_loc( loc ) {
 
 }
 
@@ -34,6 +35,10 @@ TokenKind Token::get_kind() const {
 
 const std::string &Token::get_lexeme() const {
   return m_lexeme;
+}
+
+const Location &Token::get_loc() const {
+  return m_loc;
 }
 
 namespace {
@@ -75,10 +80,11 @@ void ADD_TO_LEXEME(LexemeBuf *lb, int ch) {
 
 }
 
-Lexer::Lexer( std::istream &in )
+Lexer::Lexer( std::istream &in, const std::string &filename )
   : m_in( in )
   , m_next( TokenKind::INVALID )
-  , m_at_eof( false ) {
+  , m_at_eof( false )
+  , m_loc( filename, 1, 1 ) {
 
 }
 
@@ -101,6 +107,23 @@ void Lexer::next( Token &tok ) {
 }
 
 int Lexer::get() {
+  int c = doget();
+  if ( c >= 0 )
+    m_loc.advance( c );
+  return c;
+}
+
+void Lexer::unget( int c ) {
+  assert( c >= 0 );
+  m_buf.push_back( char( c ) );
+  m_loc.unadvance( c );
+}
+
+const Location &Lexer::get_loc() const {
+  return m_loc;
+}
+
+int Lexer::doget() {
   // Was a character put back?
   // If so, remove it from the buffer
   // and return it.
@@ -121,11 +144,6 @@ int Lexer::get() {
   return c;
 }
 
-void Lexer::unget( int c ) {
-  assert( c >= 0 );
-  m_buf.push_back( char( c ) );
-}
-
 bool Lexer::fill() {
   if ( m_at_eof )
     return false;
@@ -142,6 +160,9 @@ bool Lexer::fill() {
   if ( c < 0 )
     return false;
   unget( c );
+
+  // Remember the start location of the token
+  Location loc = m_loc;
 
   // Try to scan one token
   struct LexemeBuf lexbuf;
@@ -162,8 +183,7 @@ bool Lexer::fill() {
     rc = int( TokenKind::OPCODE );
 
   // We have a valid token
-  m_next = Token( TokenKind( rc ), std::string( lexbuf.buf ) );
-
+  m_next = Token( TokenKind( rc ), loc, std::string( lexbuf.buf ) );
 
   return true;
 }
