@@ -1,7 +1,9 @@
 #include <iostream>
+#include <memory>
 #include "lexer.h"
 #include "parser.h"
 #include "exceptions.h"
+#include "program.h"
 
 int execute( int argc, char **argv ) {
   Lexer lexer( std::cin, "<stdin>" );
@@ -14,7 +16,8 @@ int execute( int argc, char **argv ) {
   }
   */
 
-  Parser parser( lexer );
+  std::shared_ptr<Program> program = std::make_shared<Program>();
+  Parser parser( lexer, program );
   parser.parse();
   std::cout << "Everybody is good!\n";
 

@@ -34,6 +34,10 @@ Instruction &Instruction::operator=( const Instruction &rhs ) {
   return *this;
 }
 
+void Instruction::append_operand( const Operand &operand ) {
+  m_operands.push_back( operand );
+}
+
 Opcode Instruction::get_opcode() const {
   return m_opcode;
 }

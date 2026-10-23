@@ -14,12 +14,14 @@ private:
   Location m_loc;
 
 public:
-  Instruction( Opcode opcode, const Location &loc );
+  Instruction( Opcode opcode = Opcode::INVALID, const Location &loc = Location() );
   Instruction( Opcode opcode, const Location &loc, std::initializer_list< Operand > initializer_list );
   Instruction( const Instruction &other );
   ~Instruction();
 
   Instruction &operator=( const Instruction &rhs );
+
+  void append_operand( const Operand &operand );
 
   Opcode get_opcode() const;
   int get_num_operands() const;

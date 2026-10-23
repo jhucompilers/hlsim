@@ -1,7 +1,11 @@
+#include <memory>
 #include <set>
+#include <cassert>
 #include "parser.h"
 #include "lexer.h"
 #include "exceptions.h"
+#include "function.h"
+#include "instruction.h"
 
 // Grammar
 //   Unit -> TItem
@@ -23,8 +27,9 @@
 //   Operand -> imm
 //   Operand -> ident
 
-Parser::Parser( Lexer &lexer )
-  : m_lexer( lexer ) {
+Parser::Parser( Lexer &lexer, std::shared_ptr<Program> program )
+  : m_lexer( lexer )
+  , m_program( program ) {
 
 }
 
@@ -63,23 +68,18 @@ void Parser::parse_Section() {
 }
 
 void Parser::parse_Function() {
+
   // Function -> '.globl' ident ident ':' InsList
   Token globl;
   expect( TokenKind::GLOBL, globl );
   Token ident;
   expect( TokenKind::IDENT, ident );
   expect( TokenKind::IDENT, ident );
+  // start new function
+  m_cur_func = std::make_shared<Function>( ident.get_lexeme());
   Token colon;
   expect( TokenKind::COLON, colon );
   parse_InsList();
-}
-
-void Parser::parse_OptGlobal() {
-  Token tok;
-  if ( !m_lexer.peek( tok ) || tok.get_kind() != TokenKind::GLOBL )
-    return;
-  expect( TokenKind::GLOBL, tok );
-  expect( TokenKind::IDENT, tok );
 }
 
 void Parser::parse_InsList() {
@@ -106,12 +106,19 @@ void Parser::parse_Ins() {
   if ( tok.get_kind() == TokenKind::IDENT ) {
     // there is a label
     label = tok.get_lexeme();
+    m_cur_func->set_label( label );
     expect( TokenKind::COLON, tok );
-    m_lexer.next( tok );
+    m_lexer.next( tok ); // reads the opcode
   }
 
   if ( tok.get_kind() != TokenKind::OPCODE )
     throw SimError( "expected opcode", tok.get_loc() );
+
+  Opcode opcode = opcode_from_s( tok.get_lexeme() );
+  assert( opcode != Opcode::INVALID );
+
+  // start new instruction
+  m_cur_ins = Instruction( opcode, tok.get_loc() );
 
   parse_OptOperandList();
 }
@@ -132,6 +139,9 @@ void Parser::parse_OptOperandList() {
   if ( m_lexer.peek( tok ) &&
        first_OperandList.find( tok.get_kind() ) != first_OperandList.end() ) {
     parse_OperandList();
+  } else {
+    // done with the Operand list
+    m_cur_func->add_instruction( m_cur_ins );
   }
 }
 
@@ -160,17 +170,24 @@ void Parser::parse_Operand() {
   if ( tok.get_kind() == TokenKind::VREG ) {
     // is a virtual register
     m_lexer.next( tok );
+    int vreg_num = std::stoi( tok.get_lexeme().substr( 2 ) );
+    m_cur_ins.append_operand( Operand( OperandKind::VREG, vreg_num ) );
   } else if ( tok.get_kind() == TokenKind::LPAREN ) {
     // is a memory reference via a vreg storing a pointer
     expect( TokenKind::LPAREN, tok );
     expect( TokenKind::VREG, tok );
+    int vreg_num = std::stoi( tok.get_lexeme().substr( 2 ) );
     expect( TokenKind::RPAREN, tok );
+    m_cur_ins.append_operand( Operand( OperandKind::VREG_MEMREF, vreg_num ) );
   } else if ( tok.get_kind() == TokenKind::IMMEDIATE ) {
     // is an immediate operand
     expect( TokenKind::IMMEDIATE, tok );
+    long imm_val = std::stol( tok.get_lexeme().substr( 1 ) );
+    m_cur_ins.append_operand( Operand( OperandKind::IMM, imm_val ) );
   } else {
     // is a label
     expect( TokenKind::IDENT, tok );
+    m_cur_ins.append_operand( Operand( tok.get_lexeme() ) );
   }
 }
 

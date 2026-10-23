@@ -2,10 +2,15 @@
 #define PARSER_H
 
 #include "lexer.h"
+#include "program.h"
+#include "instruction.h"
 
 class Parser {
 private:
   Lexer &m_lexer;
+  std::shared_ptr<Program> m_program;
+  std::shared_ptr<Function> m_cur_func;
+  Instruction m_cur_ins;
   // TODO: Program
 
   // No value semantics
@@ -13,7 +18,7 @@ private:
   Parser &operator=( const Parser & ) = delete;
 
 public:
-  Parser( Lexer &lexer );
+  Parser( Lexer &lexer, std::shared_ptr<Program> program );
   ~Parser();
 
   void parse();
@@ -23,7 +28,6 @@ private:
   void parse_TItem();
   void parse_Section();
   void parse_Function();
-  void parse_OptGlobal();
   void parse_InsList();
   void parse_Ins();
   void parse_OptOperandList();
