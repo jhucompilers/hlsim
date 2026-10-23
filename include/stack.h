@@ -94,6 +94,9 @@ public:
   // and the instruction offset in that function in the
   // variables referenced by the parameters
   void ret( const Function *&caller, unsigned &ret_ins_offset );
+
+  // Get a pointer to the top Frame
+  Frame *get_top();
 };
 
 #endif // STACK_H

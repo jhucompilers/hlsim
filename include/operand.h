@@ -1,6 +1,7 @@
 #ifndef OPERAND_H
 #define OPERAND_H
 
+#include <cstdint>
 #include <string>
 
 enum class OperandKind {
@@ -15,11 +16,11 @@ enum class OperandKind {
 class Operand {
 private:
   OperandKind m_kind;
-  long m_ival; // register number or immediate value
+  int64_t m_ival; // register number or immediate value
   std::string m_label;
 
 public:
-  Operand( OperandKind kind = OperandKind::INVALID, long ival = 0 );
+  Operand( OperandKind kind = OperandKind::INVALID, int64_t ival = 0 );
   Operand( const std::string &label );
   Operand( const Operand &other );
   ~Operand();
@@ -29,9 +30,17 @@ public:
   OperandKind get_kind() const;
   bool has_vreg() const;
   int get_vreg() const;
-  long get_imm() const;
+  int64_t get_imm() const;
   bool is_memref() const;
   std::string get_label() const;
+
+  // Set the instruction offset of the instruction targeted by a
+  // control flow label.
+  void set_target_offset( unsigned offset );
+
+  // Get the instruction offset of the instruction targeted by a
+  // label.
+  unsigned get_target_offset() const;
 };
 
 #endif // OPERAND_H

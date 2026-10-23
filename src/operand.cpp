@@ -1,7 +1,7 @@
 #include <cassert>
 #include "operand.h"
 
-Operand::Operand( OperandKind kind, long ival )
+Operand::Operand( OperandKind kind, int64_t ival )
   : m_kind( kind )
   , m_ival( ival ) {
   assert( kind != OperandKind::LABEL );
@@ -47,7 +47,7 @@ int Operand::get_vreg() const {
   return int( m_ival );
 }
 
-long Operand::get_imm() const {
+int64_t Operand::get_imm() const {
   assert( m_kind == OperandKind::IMM );
   return m_ival;
 }
@@ -59,4 +59,14 @@ bool Operand::is_memref() const {
 std::string Operand::get_label() const {
   assert( m_kind == OperandKind::LABEL );
   return m_label;
+}
+
+void Operand::set_target_offset( unsigned offset ) {
+  assert( m_kind == OperandKind::LABEL );
+  m_ival = offset;
+}
+
+unsigned Operand::get_target_offset() const {
+  assert( m_ival >= 0 );
+  return unsigned( m_ival );
 }

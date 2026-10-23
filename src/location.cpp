@@ -56,7 +56,7 @@ void Location::advance( int c ) {
     ++m_line;
     m_col = 1;
   } else
-    --m_col;
+    ++m_col;
 }
 
 void Location::unadvance( int c ) {

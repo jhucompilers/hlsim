@@ -82,7 +82,7 @@ void Parser::parse_Function() {
   parse_InsList();
 
   // Add new function to Program
-  m_program.add_function( m_cur_func );
+  m_program.add_function( m_cur_func, ident.get_loc() );
 }
 
 void Parser::parse_InsList() {

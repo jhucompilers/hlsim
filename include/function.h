@@ -3,7 +3,9 @@
 
 #include <vector>
 #include <unordered_map>
+#include <string>
 #include "instruction.h"
+class Location;
 
 class Function {
 public:
@@ -23,13 +25,20 @@ public:
   Function( const std::string &name );
   ~Function();
 
+  const std::string &get_name() const;
+
   void set_label( const std::string &label );
   void add_instruction( const Instruction &ins );
 
+  unsigned lookup_label( const std::string &label, const Location &loc ) const;
+
   // Support for iterating over the instructions
-  typedef InsList::const_iterator const_iterator;
-  const_iterator begin() const;
-  const_iterator end() const;
+  typedef InsList::iterator iterator;
+  iterator begin();
+  iterator end();
+
+  unsigned get_num_instructions() const;
+  const Instruction &at( unsigned index ) const;
 };
 
 #endif // FUNCTION_H

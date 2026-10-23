@@ -1,0 +1,11 @@
+/*
+ * Trivial example program
+ */
+
+  .section .text
+
+  .globl main
+main:
+  enter $16
+  leave $16
+  ret

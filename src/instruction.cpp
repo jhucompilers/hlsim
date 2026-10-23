@@ -1,4 +1,5 @@
 #include <cassert>
+#include <stdexcept>
 #include "instruction.h"
 
 Instruction::Instruction( Opcode opcode, const Location &loc )
@@ -50,8 +51,15 @@ int Instruction::get_num_operands() const {
   return m_num_operands;
 }
 
-const Operand &Instruction::operator[]( size_t i ) const {
-  assert( i < size_t( m_num_operands ) );
+const Operand &Instruction::at( size_t i ) const {
+  if ( i >= size_t( m_num_operands ) )
+    throw std::out_of_range( "invalid operand index" );
+  return m_operands[ i ];
+}
+
+Operand &Instruction::at( size_t i ) {
+  if ( i >= size_t( m_num_operands ) )
+    throw std::out_of_range( "invalid operand index" );
   return m_operands[ i ];
 }
 

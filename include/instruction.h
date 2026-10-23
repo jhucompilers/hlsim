@@ -25,7 +25,8 @@ public:
 
   Opcode get_opcode() const;
   int get_num_operands() const;
-  const Operand &operator[]( size_t i ) const;
+  const Operand &at( size_t i ) const;
+  Operand &at( size_t i );
   const Location &get_loc() const;
 
 private:

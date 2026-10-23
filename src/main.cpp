@@ -21,6 +21,9 @@ int execute( int argc, char **argv ) {
   Parser parser( lexer, program );
   parser.parse();
 
+  // Validate the program
+  program.validate();
+
   Simulator sim( program );
   sim.execute();
 
