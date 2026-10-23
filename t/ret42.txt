@@ -1,0 +1,8 @@
+  .section .text
+
+  .globl main
+main:
+  enter $16
+  mov_l vr0, $42
+  leave $16
+  ret

@@ -34,6 +34,7 @@ public:
 private:
   void validate_instruction( const Function &fn, Instruction &ins ) const;
   void validate_instruction_variable_format( const Function &fn, Instruction &ins ) const;
+  void validate_mov( const Function &fn, Instruction &ins ) const;
 };
 
 #endif // PROGRAM_H

@@ -98,9 +98,30 @@ void Program::validate_instruction( const Function &fn, Instruction &ins ) const
 
 void Program::validate_instruction_variable_format( const Function &fn, Instruction &ins ) const {
   switch ( ins.get_opcode() ) {
-  // TODO
+  case Opcode::HINS_mov_b:
+  case Opcode::HINS_mov_w:
+  case Opcode::HINS_mov_l:
+  case Opcode::HINS_mov_q:
+    validate_mov( fn, ins );
+    break;
 
   default:
     throw SimError( "don't know how to validate " + std::to_string(int(ins.get_opcode())), ins.get_loc() );
   }
+}
+
+void Program::validate_mov( const Function &fn, Instruction &ins ) const {
+  // There must be two operands
+  if ( ins.get_num_operands() != 2 )
+    throw SimError( "wrong number of operands", ins.get_loc() );
+  
+  // The destination operand must be a vreg or a memory reference
+  const Operand &dest = ins.at( 0 );
+  if ( dest.get_kind() != OperandKind::VREG && dest.get_kind() != OperandKind::VREG_MEMREF )
+    throw SimError( "invalid destination operand", ins.get_loc() );
+
+  // The source operand must not be a label
+  const Operand &src = ins.at( 1 );
+  if ( src.get_kind() == OperandKind::LABEL )
+    throw SimError( "invalid source operand", ins.get_loc() );
 }

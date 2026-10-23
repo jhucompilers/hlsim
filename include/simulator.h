@@ -5,6 +5,7 @@
 #include "stack.h"
 class Program;
 class Instruction;
+class Operand;
 class Function;
 
 class Simulator {
@@ -23,10 +24,17 @@ public:
   Simulator( const Program &program );
   ~Simulator();
 
-  void execute();
+  uint64_t execute();
 
 private:
   unsigned execute_ins( const Instruction &ins, unsigned pc );
+  void execute_mov( const Instruction &ins );
+  uint64_t load_source( Frame *frame, const Operand &operand, unsigned operand_size, const Location &loc );
+  void store_dest( Frame *frame, const Operand &operand, unsigned operand_size, uint64_t val, const Location &loc );
+  uint64_t read_vreg( Frame *frame, int vreg_num ) const;
+  void write_vreg( Frame *frame, int vreg_num, uint64_t val );
+  uint64_t read_mem( uint64_t addr, unsigned operand_size, const Location &loc );
+  uint64_t trim( uint64_t val, unsigned operand_size ) const;
 };
 
 #endif // SIMULATOR_H

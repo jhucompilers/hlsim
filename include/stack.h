@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <memory>
-#include <string>
 #include <vector>
 class Location;
 class Function;
@@ -12,10 +11,14 @@ class Function;
 // in a stack frame.
 class Block {
 public:
+  // Number of bits in the stack frame offset part of an
+  // address.
+  static constexpr unsigned ADDR_RANGE_SHIFT = 25;
+
   // Number of bytes in the address range for the memory block
   // of one stack frame. This is, therefore, the maximum amount
   // of memory that can be allocated.
-  static constexpr uint64_t ADDR_RANGE = (32UL*1024UL*1024UL);
+  static constexpr uint64_t ADDR_RANGE = ( 1UL << ADDR_RANGE_SHIFT );
 
 private:
   uint64_t m_base;
@@ -100,6 +103,16 @@ public:
 
   // Get a pointer to the top Frame
   Frame *get_top();
+
+  // Return how many Frames are currently on the stack
+  unsigned get_num_frames() const;
+
+  // Return a pointer to a frame (0 is the frame for main,
+  // 1 is the function called from main, etc.)
+  Frame *get_frame( unsigned index ) const;
+
+  // Convert a uint64_t value into a hexadecimal string
+  static std::string to_hex( uint64_t val );
 };
 
 #endif // STACK_H

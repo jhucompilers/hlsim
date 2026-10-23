@@ -9,7 +9,7 @@
 
 namespace {
 
-std::string to_hex( uint64_t x ) {
+std::string to_hex_s( uint64_t x ) {
   std::stringstream ss;
   ss << std::hex << x;
   return ss.str();
@@ -107,7 +107,7 @@ uint64_t Block::bounds_and_alignment_check( const char *op, uint64_t addr, uint6
   msg += "Invalid ";
   msg += op;
   msg += " addr=";
-  msg += to_hex( offset + size );
+  msg += to_hex_s( offset + size );
   msg += ", size=";
   msg += std::to_string( size );
   msg += " (";
@@ -210,4 +210,17 @@ void Stack::ret( const Function *&caller, unsigned &ret_ins_offset ) {
 Frame *Stack::get_top() {
   assert( !m_stack.empty() );
   return m_stack.back().get();
+}
+
+unsigned Stack::get_num_frames() const {
+  return unsigned( m_stack.size() );
+}
+
+Frame *Stack::get_frame( unsigned index ) const {
+  assert( index < m_stack.size() );
+  return m_stack.at( index ).get();
+}
+
+std::string Stack::to_hex( uint64_t val ) {
+  return to_hex_s( val );
 }

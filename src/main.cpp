@@ -25,11 +25,9 @@ int execute( int argc, char **argv ) {
   program.validate();
 
   Simulator sim( program );
-  sim.execute();
+  uint64_t result = sim.execute();
 
-  std::cout << "Everybody is good!\n";
-
-  return 0;
+  return int( result );
 }
 
 int main( int argc, char **argv ) {

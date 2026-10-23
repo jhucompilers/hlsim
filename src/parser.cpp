@@ -122,8 +122,8 @@ void Parser::parse_Ins() {
 
   // start new instruction
   m_cur_ins = Instruction( opcode, tok.get_loc() );
-
   parse_OptOperandList();
+  m_cur_func->add_instruction( m_cur_ins );
 }
 
 void Parser::parse_OptOperandList() {
@@ -142,9 +142,6 @@ void Parser::parse_OptOperandList() {
   if ( m_lexer.peek( tok ) &&
        first_OperandList.find( tok.get_kind() ) != first_OperandList.end() ) {
     parse_OperandList();
-  } else {
-    // done with the Operand list
-    m_cur_func->add_instruction( m_cur_ins );
   }
 }
 
