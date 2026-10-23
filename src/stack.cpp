@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstring>
 #include "exceptions.h"
+#include "function.h"
 #include "stack.h"
 
 namespace {
@@ -128,7 +129,10 @@ Frame::Frame( uint64_t base, const Function *caller, const Function *callee, uns
   , m_caller( caller )
   , m_callee( callee )
   , m_ret_ins_offset( ret_ins_offset ) {
-
+  // Reserve space for local virtual register values
+  assert( callee->get_highest_vreg_num() >= 9 );
+  int num_local_vregs = callee->get_highest_vreg_num() - 9;
+  m_local_vregs = std::make_unique<uint64_t[]>( num_local_vregs );
 }
 
 Frame::~Frame() {
@@ -166,6 +170,18 @@ Block *Frame::get_block( const Location &loc ) {
   if ( !p )
     throw SimError( "memory operation in stack frame with no memory block", loc );
   return p;
+}
+
+void Frame::store_local_vreg( int vreg_num, uint64_t val ) {
+  assert( vreg_num >= 10 );
+  assert( vreg_num <= m_callee->get_highest_vreg_num() );
+  m_local_vregs[ vreg_num - 10 ] = val;
+}
+
+uint64_t Frame::load_local_vreg( int vreg_num ) {
+  assert( vreg_num >= 10 );
+  assert( vreg_num <= m_callee->get_highest_vreg_num() );
+  return m_local_vregs[ vreg_num - 10 ];
 }
 
 // Stack class: represents the current call stack

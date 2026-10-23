@@ -54,7 +54,7 @@ private:
   const Function *m_caller, *m_callee; // pointers to caller and callee
   unsigned m_ret_ins_offset; // offset of the instruction to return to in the caller
   std::unique_ptr<Block> m_block; // memory block
-  // TODO: temporary vregs (vr10 and above)
+  std::unique_ptr<uint64_t[]> m_local_vregs;
 
   // no value semantics
   Frame( const Frame & ) = delete;
@@ -72,6 +72,9 @@ public:
   void leave( uint64_t nbytes, const Location &loc );
 
   Block *get_block( const Location &loc );
+
+  void store_local_vreg( int vreg_num, uint64_t val );
+  uint64_t load_local_vreg( int vreg_num );
 };
 
 class Stack {

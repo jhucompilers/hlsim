@@ -9,7 +9,8 @@
 Simulator::Simulator( const Program &program )
   : m_program( program )
   , m_done( false ) {
-
+  for ( int i = 0; i < 10; ++i )
+    m_global_vregs[i] = uint64_t(0) - 1U;
 }
 
 Simulator::~Simulator() {
@@ -19,14 +20,14 @@ Simulator::~Simulator() {
 void Simulator::execute() {
   Location startup_loc( "<start>", 1, 1 );
   std::shared_ptr<Function> main = m_program.lookup_fn( "main", startup_loc );
-  const Function *cur_fn = main.get();
-  m_stack.call( Block::ADDR_RANGE, nullptr, cur_fn, 0 );
+  m_cur_fn = main.get();
+  m_stack.call( Block::ADDR_RANGE, nullptr, m_cur_fn, 0 );
 
   unsigned pc = 0;
 
   while ( !m_done ) {
-    assert( pc < unsigned( cur_fn->get_num_instructions() ) );
-    const Instruction &ins = cur_fn->at( pc );
+    assert( pc < unsigned( m_cur_fn->get_num_instructions() ) );
+    const Instruction &ins = m_cur_fn->at( pc );
     pc = execute_ins( ins, pc );
   }
 }
@@ -42,6 +43,12 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
 
   case Opcode::HINS_leave:
     cur_frame->leave( ins.at(0).get_imm(), ins.get_loc() );
+    break;
+  
+  case Opcode::HINS_ret:
+    m_stack.ret( m_cur_fn, next );
+    if ( m_cur_fn == nullptr )
+      m_done = true;
     break;
   
   default:
