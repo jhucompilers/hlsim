@@ -3,7 +3,8 @@
 #include "function.h"
 
 Function::Function( const std::string &name )
-  : m_name( name ) {
+  : m_name( name )
+  , m_highest_vreg_num( 9 ) {
 
 }
 
@@ -21,6 +22,15 @@ void Function::set_label( const std::string &label ) {
 
 void Function::add_instruction( const Instruction &ins ) {
   m_instructions.push_back( ins );
+
+  // Keep track of the highest vreg number referenced by
+  // any instruction
+  for ( int i = 0; i < ins.get_num_operands(); ++i ) {
+    const Operand &operand = ins.at( unsigned(i) );
+    if ( operand.has_vreg() )
+      if ( operand.get_vreg() > m_highest_vreg_num )
+        m_highest_vreg_num = operand.get_vreg();
+  }
 }
 
 unsigned Function::lookup_label( const std::string &label, const Location &loc ) const {
@@ -45,4 +55,8 @@ unsigned Function::get_num_instructions() const {
 const Instruction &Function::at( unsigned index ) const {
   assert( index < m_instructions.size() );
   return m_instructions.at( index );
+}
+
+int Function::get_highest_vreg_num() const {
+  return m_highest_vreg_num;
 }

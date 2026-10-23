@@ -16,6 +16,7 @@ private:
   InsList m_instructions;
   // map of label names to instruction indices
   std::unordered_map< std::string, unsigned > m_labels;
+  int m_highest_vreg_num;
 
   // No value semantics
   Function( const Function & ) = delete;
@@ -39,6 +40,8 @@ public:
 
   unsigned get_num_instructions() const;
   const Instruction &at( unsigned index ) const;
+
+  int get_highest_vreg_num() const;
 };
 
 #endif // FUNCTION_H
