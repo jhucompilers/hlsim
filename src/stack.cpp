@@ -111,7 +111,7 @@ uint64_t Block::bounds_and_alignment_check( const char *op, uint64_t addr, uint6
   msg += std::to_string( size );
   msg += " (";
   if ( !in_bounds )
-    msg += " out of bounds";
+    msg += "out of bounds";
   if ( !aligned ) {
     if ( !in_bounds )
       msg += ", ";
