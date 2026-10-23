@@ -4,6 +4,7 @@
 #include "parser.h"
 #include "exceptions.h"
 #include "program.h"
+#include "simulator.h"
 
 int execute( int argc, char **argv ) {
   Lexer lexer( std::cin, "<stdin>" );
@@ -16,9 +17,13 @@ int execute( int argc, char **argv ) {
   }
   */
 
-  std::shared_ptr<Program> program = std::make_shared<Program>();
+  Program program;
   Parser parser( lexer, program );
   parser.parse();
+
+  Simulator sim( program );
+  sim.execute();
+
   std::cout << "Everybody is good!\n";
 
   return 0;

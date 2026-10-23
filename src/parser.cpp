@@ -27,7 +27,7 @@
 //   Operand -> imm
 //   Operand -> ident
 
-Parser::Parser( Lexer &lexer, std::shared_ptr<Program> program )
+Parser::Parser( Lexer &lexer, Program &program )
   : m_lexer( lexer )
   , m_program( program ) {
 
@@ -80,6 +80,9 @@ void Parser::parse_Function() {
   Token colon;
   expect( TokenKind::COLON, colon );
   parse_InsList();
+
+  // Add new function to Program
+  m_program.add_function( m_cur_func );
 }
 
 void Parser::parse_InsList() {

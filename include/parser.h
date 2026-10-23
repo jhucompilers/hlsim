@@ -8,7 +8,7 @@
 class Parser {
 private:
   Lexer &m_lexer;
-  std::shared_ptr<Program> m_program;
+  Program &m_program;
   std::shared_ptr<Function> m_cur_func;
   Instruction m_cur_ins;
   // TODO: Program
@@ -18,7 +18,7 @@ private:
   Parser &operator=( const Parser & ) = delete;
 
 public:
-  Parser( Lexer &lexer, std::shared_ptr<Program> program );
+  Parser( Lexer &lexer, Program &program );
   ~Parser();
 
   void parse();
