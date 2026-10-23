@@ -2,7 +2,6 @@
 #define INSTRUCTION_H
 
 #include <initializer_list>
-#include <vector>
 #include "opcode.h"
 #include "operand.h"
 #include "location.h"
@@ -10,7 +9,8 @@
 class Instruction {
 private:
   Opcode m_opcode;
-  std::vector< Operand > m_operands;
+  Operand m_operands[3];
+  int m_num_operands;
   Location m_loc;
 
 public:
@@ -27,6 +27,9 @@ public:
   int get_num_operands() const;
   const Operand &operator[]( size_t i ) const;
   const Location &get_loc() const;
+
+private:
+  void copy_operands( const Instruction &ins );
 };
 
 #endif // INSTRUCTION_H

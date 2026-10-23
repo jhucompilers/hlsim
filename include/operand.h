@@ -4,6 +4,7 @@
 #include <string>
 
 enum class OperandKind {
+  INVALID,
   VREG,
   VREG_MEMREF,
   IMM,
@@ -18,7 +19,7 @@ private:
   std::string m_label;
 
 public:
-  Operand( OperandKind kind, long ival );
+  Operand( OperandKind kind = OperandKind::INVALID, long ival = 0 );
   Operand( const std::string &label );
   Operand( const Operand &other );
   ~Operand();

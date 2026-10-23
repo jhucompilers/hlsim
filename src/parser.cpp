@@ -163,6 +163,9 @@ void Parser::parse_Operand() {
   // Operand -> imm
   // Operand -> ident
 
+  if ( m_cur_ins.get_num_operands() >= 3 )
+    throw SimError( "hlsim allows at most 3 operands per instruction", m_lexer.get_loc() );
+
   Token tok;
   if ( !m_lexer.peek( tok ) )
     throw SimError( "unexpected EOF parsing operand", m_lexer.get_loc() );
