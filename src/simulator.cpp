@@ -108,6 +108,45 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
     next = ins.at(0).get_target_offset();
     break;
 
+  case Opcode::HINS_cmplt_b:
+  case Opcode::HINS_cmplt_w:
+  case Opcode::HINS_cmplt_l:
+  case Opcode::HINS_cmplt_q:
+    execute_scmp( ins, get_operand_size( ins.get_opcode(), Opcode::HINS_cmplt_b ), Compare::LT );
+    break;
+
+  case Opcode::HINS_cmplte_b:
+  case Opcode::HINS_cmplte_w:
+  case Opcode::HINS_cmplte_l:
+  case Opcode::HINS_cmplte_q:
+    execute_scmp( ins, get_operand_size( ins.get_opcode(), Opcode::HINS_cmplte_b ), Compare::LTE );
+    break;
+    
+  case Opcode::HINS_cmpgt_b:
+  case Opcode::HINS_cmpgt_w:
+  case Opcode::HINS_cmpgt_l:
+  case Opcode::HINS_cmpgt_q:
+    execute_scmp( ins, get_operand_size( ins.get_opcode(), Opcode::HINS_cmpgt_b ), Compare::GT );
+    break;
+
+  case Opcode::HINS_cmpgte_b:
+  case Opcode::HINS_cmpgte_w:
+  case Opcode::HINS_cmpgte_l:
+  case Opcode::HINS_cmpgte_q:
+    execute_scmp( ins, get_operand_size( ins.get_opcode(), Opcode::HINS_cmpgte_b ), Compare::GTE );
+    break;
+
+  case Opcode::HINS_cjmp_t:
+  case Opcode::HINS_cjmp_f:
+    {
+      Frame *cur_frame = m_stack.get_top();
+      uint64_t boolval = load_source( cur_frame, ins.at(0), 1, ins.get_loc() );
+      bool take_branch = ( ins.get_opcode() == Opcode::HINS_cjmp_t ) ? bool(boolval) : !bool(boolval);
+      if ( take_branch )
+        next = ins.at(1).get_target_offset();
+    }
+    break;
+
   default:
     throw SimError( "instruction not simulated yet", ins.get_loc() );
   }
@@ -120,6 +159,66 @@ void Simulator::execute_mov( const Instruction &ins ) {
   Frame *frame = m_stack.get_top();
   uint64_t val = load_source( frame, ins.at( 1 ), operand_size, ins.get_loc() );
   store_dest( frame, ins.at( 0 ), operand_size, val, ins.get_loc() );
+}
+
+void Simulator::execute_scmp( const Instruction &ins, unsigned operand_size, Compare cmp ) {
+  Frame *cur_frame = m_stack.get_top();
+
+  // Get left and right operand values
+  uint64_t uleft, uright;
+  uleft = load_source( cur_frame, ins.at(1), operand_size, ins.get_loc() );
+  uright = load_source( cur_frame, ins.at(2), operand_size, ins.get_loc() );
+
+  // Convert to signed values, sign-extending to 64 bits as appropriate
+  int64_t left, right;
+  switch ( operand_size ) {
+  case 1:
+    left = int8_t( uleft & 0xFF );
+    right = int8_t( uright & 0xFF );
+    break;
+  case 2:
+    left = int16_t( uleft & 0xFFFF );
+    right = int16_t( uright & 0xFFFF );
+    break;
+  case 4:
+    left = int32_t( uleft & 0xFFFFFFFF );
+    right = int32_t( uright & 0xFFFFFFFF );
+    break;
+  case 8:
+    left = int64_t( uleft );
+    right = int64_t( uright );
+    break;
+  default:
+    assert( false );
+    left = 0;
+    right = 0;
+  }
+
+  // Do the comparison
+  uint64_t result;
+  switch ( cmp ) {
+  case Compare::LT:
+    result = ( left < right );
+    break;
+  case Compare::LTE:
+    result = ( left <= right );
+    break;
+  case Compare::GT:
+    result = ( left > right );
+    break;
+  case Compare::GTE:
+    result = ( left >= right );
+    break;
+  case Compare::EQ:
+    result = ( left == right );
+    break;
+  case Compare::NEQ:
+    result = ( left != right );
+    break;
+  }
+
+  // Store result
+  store_dest( cur_frame, ins.at(0), 8, result, ins.get_loc() );
 }
 
 uint64_t Simulator::load_source( Frame *frame, const Operand &operand, unsigned operand_size, const Location &loc ) {

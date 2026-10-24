@@ -27,8 +27,12 @@ public:
   uint64_t execute();
 
 private:
+  // Kinds of comparisons
+  enum class Compare { LT, LTE, GT, GTE, EQ, NEQ };
+
   unsigned execute_ins( const Instruction &ins, unsigned pc );
   void execute_mov( const Instruction &ins );
+  void execute_scmp( const Instruction &ins, unsigned operand_size, Compare cmp );
   uint64_t load_source( Frame *frame, const Operand &operand, unsigned operand_size, const Location &loc );
   void store_dest( Frame *frame, const Operand &operand, unsigned operand_size, uint64_t val, const Location &loc );
   uint64_t read_vreg( Frame *frame, int vreg_num ) const;

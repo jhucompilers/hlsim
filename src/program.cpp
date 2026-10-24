@@ -24,6 +24,8 @@ const std::unordered_map<Opcode, std::vector<OperandKind>> s_instruction_formats
   { Opcode::HINS_call, { OperandKind::LABEL } },
   { Opcode::HINS_localaddr, { OperandKind::VREG, OperandKind::IMM } },
   { Opcode::HINS_jmp, { OperandKind::LABEL } },
+  { Opcode::HINS_cjmp_t, { OperandKind::VREG, OperandKind::LABEL } },
+  { Opcode::HINS_cjmp_f, { OperandKind::VREG, OperandKind::LABEL } },
 };
 
 }
@@ -103,14 +105,27 @@ void Program::validate_instruction( const Function &fn, Instruction &ins ) const
 
 void Program::validate_instruction_variable_format( const Function &fn, Instruction &ins ) const {
   switch ( ins.get_opcode() ) {
+  // Moves of various kinds
   case Opcode::HINS_mov_b:
   case Opcode::HINS_mov_w:
   case Opcode::HINS_mov_l:
   case Opcode::HINS_mov_q:
+  case Opcode::HINS_sconv_bw:
+  case Opcode::HINS_sconv_bl:
+  case Opcode::HINS_sconv_bq:
+  case Opcode::HINS_sconv_wl:
+  case Opcode::HINS_sconv_wq:
+  case Opcode::HINS_sconv_lq:
+  case Opcode::HINS_uconv_bw:
+  case Opcode::HINS_uconv_bl:
+  case Opcode::HINS_uconv_bq:
+  case Opcode::HINS_uconv_wl:
+  case Opcode::HINS_uconv_wq:
+  case Opcode::HINS_uconv_lq:
     validate_mov( fn, ins );
     break;
 
-  // All binary operator instructions
+  // All binary operator instructions (there are a lot of these)
   case Opcode::HINS_add_b:
   case Opcode::HINS_add_w:
   case Opcode::HINS_add_l:
@@ -131,6 +146,66 @@ void Program::validate_instruction_variable_format( const Function &fn, Instruct
   case Opcode::HINS_mod_w:
   case Opcode::HINS_mod_l:
   case Opcode::HINS_mod_q:
+  case Opcode::HINS_lshift_b:
+  case Opcode::HINS_lshift_w:
+  case Opcode::HINS_lshift_l:
+  case Opcode::HINS_lshift_q:
+  case Opcode::HINS_rshift_b:
+  case Opcode::HINS_rshift_w:
+  case Opcode::HINS_rshift_l:
+  case Opcode::HINS_rshift_q:
+  case Opcode::HINS_and_b:
+  case Opcode::HINS_and_w:
+  case Opcode::HINS_and_l:
+  case Opcode::HINS_and_q:
+  case Opcode::HINS_or_b:
+  case Opcode::HINS_or_w:
+  case Opcode::HINS_or_l:
+  case Opcode::HINS_or_q:
+  case Opcode::HINS_xor_b:
+  case Opcode::HINS_xor_w:
+  case Opcode::HINS_xor_l:
+  case Opcode::HINS_xor_q:
+  case Opcode::HINS_cmplt_b:
+  case Opcode::HINS_cmplt_w:
+  case Opcode::HINS_cmplt_l:
+  case Opcode::HINS_cmplt_q:
+  case Opcode::HINS_cmplte_b:
+  case Opcode::HINS_cmplte_w:
+  case Opcode::HINS_cmplte_l:
+  case Opcode::HINS_cmplte_q:
+  case Opcode::HINS_cmpgt_b:
+  case Opcode::HINS_cmpgt_w:
+  case Opcode::HINS_cmpgt_l:
+  case Opcode::HINS_cmpgt_q:
+  case Opcode::HINS_cmpgte_b:
+  case Opcode::HINS_cmpgte_w:
+  case Opcode::HINS_cmpgte_l:
+  case Opcode::HINS_cmpgte_q:
+  case Opcode::HINS_ucmplt_b:
+  case Opcode::HINS_ucmplt_w:
+  case Opcode::HINS_ucmplt_l:
+  case Opcode::HINS_ucmplt_q:
+  case Opcode::HINS_ucmplte_b:
+  case Opcode::HINS_ucmplte_w:
+  case Opcode::HINS_ucmplte_l:
+  case Opcode::HINS_ucmplte_q:
+  case Opcode::HINS_ucmpgt_b:
+  case Opcode::HINS_ucmpgt_w:
+  case Opcode::HINS_ucmpgt_l:
+  case Opcode::HINS_ucmpgt_q:
+  case Opcode::HINS_ucmpgte_b:
+  case Opcode::HINS_ucmpgte_w:
+  case Opcode::HINS_ucmpgte_l:
+  case Opcode::HINS_ucmpgte_q:
+  case Opcode::HINS_cmpeq_b:
+  case Opcode::HINS_cmpeq_w:
+  case Opcode::HINS_cmpeq_l:
+  case Opcode::HINS_cmpeq_q:
+  case Opcode::HINS_cmpneq_b:
+  case Opcode::HINS_cmpneq_w:
+  case Opcode::HINS_cmpneq_l:
+  case Opcode::HINS_cmpneq_q:
     validate_binop( fn, ins );
     break;
 
