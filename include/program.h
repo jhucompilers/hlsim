@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <memory>
-#include <map>
+#include <unordered_map>
 #include <string>
 
 class Function;
@@ -13,7 +13,8 @@ class Instruction;
 class Program {
 private:
   std::vector<std::shared_ptr<Function>> m_functions;
-  std::map<std::string, unsigned> m_fn_map;
+  std::unordered_map<std::string, unsigned> m_fn_map;
+  std::unordered_map<std::string, std::string> m_string_literals;
 
   // no value semantics
   Program( const Program & ) = delete;
@@ -25,6 +26,8 @@ public:
 
   void add_function( std::shared_ptr<Function> fn, const Location &loc );
   std::shared_ptr<Function> lookup_fn( const std::string &fn_name, const Location &loc ) const;
+
+  void define_string_literal( const std::string &name, const std::string &str_value, const Location &loc );
 
   // Check all Instructions in all Functions to make sure they
   // have a valid form (to avoid needing to check that at simulation

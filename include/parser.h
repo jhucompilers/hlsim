@@ -11,7 +11,7 @@ private:
   Program &m_program;
   std::shared_ptr<Function> m_cur_func;
   Instruction m_cur_ins;
-  // TODO: Program
+  std::string m_cur_section;
 
   // No value semantics
   Parser( const Parser & ) = delete;
@@ -33,6 +33,7 @@ private:
   void parse_OptOperandList();
   void parse_OperandList();
   void parse_Operand();
+  void parse_StringLiteral();
 
   void expect( TokenKind kind, Token &tok );
 };

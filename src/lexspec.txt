@@ -8,6 +8,10 @@ TokenKind::GLOBL
 TokenKind::SECTION
 \.section
 
+# .string directive (for defining a string literal)
+TokenKind::STRING
+\.string
+
 TokenKind::VREG
 vr[0-9]+
 
@@ -31,3 +35,9 @@ TokenKind::RPAREN
 
 TokenKind::IMMEDIATE
 \$[0-9]+
+
+TokenKind::IMMEDIATE_LABEL
+\$[A-Za-z\._][A-Za-z\._0-9]*
+
+TokenKind::STRING_LITERAL
+"([^"\\]|\\\p)*"

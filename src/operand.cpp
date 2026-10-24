@@ -7,11 +7,11 @@ Operand::Operand( OperandKind kind, int64_t ival )
   assert( kind != OperandKind::LABEL );
 }
 
-Operand::Operand( const std::string &label )
-  : m_kind( OperandKind::LABEL )
+Operand::Operand( OperandKind kind, const std::string &label )
+  : m_kind( kind )
   , m_ival( 0 )
   , m_label( label ) {
-
+  assert( kind == OperandKind::LABEL || kind == OperandKind::IMM_LABEL );
 }
 
 Operand::Operand( const Operand &other )
@@ -66,7 +66,7 @@ bool Operand::is_assignable() const {
 }
 
 bool Operand::is_readable() const {
-  return is_assignable() || m_kind == OperandKind::IMM;
+  return is_assignable() || m_kind == OperandKind::IMM || m_kind == OperandKind::IMM_LABEL;
 }
 
 void Operand::set_target_offset( unsigned offset ) {

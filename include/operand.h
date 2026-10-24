@@ -10,6 +10,7 @@ enum class OperandKind {
   VREG_MEMREF,
   IMM,
   LABEL,
+  IMM_LABEL, // immediate label (used only for string constants)
   // TODO: memrefs with fancier addressing modes?
 };
 
@@ -21,7 +22,7 @@ private:
 
 public:
   Operand( OperandKind kind = OperandKind::INVALID, int64_t ival = 0 );
-  Operand( const std::string &label );
+  Operand( OperandKind kind, const std::string &label );
   Operand( const Operand &other );
   ~Operand();
 

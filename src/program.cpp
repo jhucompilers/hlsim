@@ -55,6 +55,14 @@ std::shared_ptr<Function> Program::lookup_fn( const std::string &fn_name, const 
   return m_functions.at( i->second );
 }
 
+void Program::define_string_literal( const std::string &name, const std::string &str_value, const Location &loc ) {
+  auto i = m_string_literals.find( name );
+  if ( i != m_string_literals.end() )
+    throw SimError( "duplicate string literal '" + name + "'", loc );
+
+  m_string_literals[ name ] = str_value;
+}
+
 void Program::validate() const {
   for ( auto i = m_functions.begin(); i != m_functions.end(); ++i )
     for ( auto j = (*i)->begin(); j != (*i)->end(); ++j )

@@ -10,6 +10,7 @@ enum class TokenKind {
   INVALID,
   GLOBL,
   SECTION,
+  STRING,
   VREG,
   IDENT,
   OPCODE, // used for identifiers which are valid mnemonics
@@ -18,6 +19,8 @@ enum class TokenKind {
   LPAREN,
   RPAREN,
   IMMEDIATE,
+  IMMEDIATE_LABEL,
+  STRING_LITERAL,
 };
 
 class Token {
@@ -36,6 +39,8 @@ public:
   TokenKind get_kind() const;
   const std::string &get_lexeme() const;
   const Location &get_loc() const;
+
+  std::string get_string_literal_value() const;
 };
 
 class Lexer {

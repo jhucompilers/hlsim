@@ -12,6 +12,7 @@
 //   Unit -> TItem Unit
 //   TItem -> Section
 //   TItem -> Function
+//   TItem -> StringLiteral
 //   Section -> '.section' ident
 //   Function -> '.globl' ident ident ':' InsList
 //   InsList -> Ins
@@ -25,7 +26,9 @@
 //   Operand -> vreg
 //   Operand -> '(' vreg ')'
 //   Operand -> imm
+//   Operand -> imm_label
 //   Operand -> ident
+//   StringLiteral -> ident ':' '.string' string_literal
 
 Parser::Parser( Lexer &lexer, Program &program )
   : m_lexer( lexer )
@@ -49,25 +52,33 @@ void Parser::parse_Unit() {
 }
 
 void Parser::parse_TItem() {
+  // TItem -> Section
+  // TItem -> Function
+  // TItem -> StringLiteral
+
   Token tok;
   if ( !m_lexer.peek( tok ) )
     throw SimError( "Unexpected EOF looking for top-level item", m_lexer.get_loc() );
-  if ( tok.get_kind() == TokenKind::SECTION ) {
+  if ( tok.get_kind() == TokenKind::SECTION )
     parse_Section();
-    return;
-  }
-  parse_Function();
+  else if ( tok.get_kind() == TokenKind::GLOBL )
+    parse_Function();
+  else
+    parse_StringLiteral();
 }
 
 void Parser::parse_Section() {
   Token tok;
   // Section -> ^ .section ident
-  m_lexer.next( tok );
+  expect( TokenKind::SECTION, tok );
   expect( TokenKind::IDENT, tok );
+  m_cur_section = tok.get_lexeme();
   return;
 }
 
 void Parser::parse_Function() {
+  if ( m_cur_section != ".text" )
+    throw SimError( "functions must be defined in the .text section", m_lexer.get_loc() );
 
   // Function -> '.globl' ident ident ':' InsList
   Token globl;
@@ -187,11 +198,31 @@ void Parser::parse_Operand() {
     expect( TokenKind::IMMEDIATE, tok );
     long imm_val = std::stol( tok.get_lexeme().substr( 1 ) );
     m_cur_ins.append_operand( Operand( OperandKind::IMM, imm_val ) );
+  } else if ( tok.get_kind() == TokenKind::IMMEDIATE_LABEL) {
+    // immediate label (i.e., specifying the memory address of a string constant)
+    expect( TokenKind::IMMEDIATE_LABEL, tok );
+    m_cur_ins.append_operand( Operand( OperandKind::IMM_LABEL, tok.get_lexeme() ) );
   } else {
     // is a label
     expect( TokenKind::IDENT, tok );
-    m_cur_ins.append_operand( Operand( tok.get_lexeme() ) );
+    m_cur_ins.append_operand( Operand( OperandKind::LABEL, tok.get_lexeme() ) );
   }
+}
+
+void Parser::parse_StringLiteral() {
+  if ( m_cur_section != ".rodata" )
+    throw SimError( "string constants must be in the .rodata section", m_lexer.get_loc() );
+
+  // StringLiteral -> ident ':' '.string' string_literal
+  Token ident;
+  expect( TokenKind::IDENT, ident );
+  Token tok;
+  expect( TokenKind::COLON, tok );
+  expect( TokenKind::STRING, tok );
+  expect( TokenKind::STRING_LITERAL, tok );
+
+  std::string str_value = tok.get_string_literal_value();
+  m_program.define_string_literal( ident.get_lexeme(), str_value, ident.get_loc() );
 }
 
 void Parser::expect( TokenKind kind, Token &tok ) {

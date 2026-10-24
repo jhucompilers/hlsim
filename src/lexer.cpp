@@ -44,6 +44,46 @@ const Location &Token::get_loc() const {
   return m_loc;
 }
 
+std::string Token::get_string_literal_value() const {
+  std::string str_value;
+
+  // Iterate over all of the characters in the string except
+  // the beginning and end '"' characters
+  for ( auto i = m_lexeme.begin() + 1; i < m_lexeme.end() - 1; ++i ) {
+    char c = *i;
+    if ( c != '\\' )
+      str_value += c;
+    else {
+      // handle escape sequence (we only handle some very basic ones)
+      ++i;
+      if ( i < m_lexeme.end() - 1 ) {
+        c = *i;
+        switch ( c ) {
+        case 't':
+          str_value += '\t';
+          break;
+        case 'n':
+          str_value += '\n';
+          break;
+        case 'v':
+          str_value += '\v';
+          break;
+        case 'f':
+          str_value += '\f';
+          break;
+        case 'b':
+          str_value += '\b';
+          break;
+        default:
+          str_value += c;
+        }
+      }
+    }
+  }
+
+  return str_value;
+}
+
 namespace {
 
 // Make token length
