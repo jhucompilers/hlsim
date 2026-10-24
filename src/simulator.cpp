@@ -73,16 +73,19 @@ uint64_t Simulator::execute() {
   return m_global_vregs[0];
 }
 
-#define HANDLE_BINOP(op, base_opcode) \
-    { \
+#define HANDLE_BINOP_CHECKRIGHT(op, base_opcode, checkright) \
+    do { \
       unsigned operand_size = get_operand_size( ins.get_opcode(), base_opcode ); \
       Frame *cur_frame = m_stack.get_top(); \
       uint64_t left, right, result; \
       left = load_source( cur_frame, ins.at(1), operand_size, ins.get_loc() ); \
       right = load_source( cur_frame, ins.at(2), operand_size, ins.get_loc() ); \
+      checkright; \
       result = left op right; \
       store_dest( cur_frame, ins.at(0), operand_size, result, ins.get_loc() ); \
-    }
+    } while ( 0 )
+
+#define HANDLE_BINOP(op, base_opcode) HANDLE_BINOP_CHECKRIGHT(op, base_opcode, (void) right)
 
 unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
   unsigned next = pc + 1;
@@ -200,6 +203,20 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
   case Opcode::HINS_mul_l:
   case Opcode::HINS_mul_q:
     HANDLE_BINOP( *, Opcode::HINS_mul_b );
+    break;
+
+  case Opcode::HINS_div_b:
+  case Opcode::HINS_div_w:
+  case Opcode::HINS_div_l:
+  case Opcode::HINS_div_q:
+    HANDLE_BINOP_CHECKRIGHT( /, Opcode::HINS_div_b, if ( right == 0 ) throw SimError( "division by 0", ins.get_loc() ) );
+    break;
+
+  case Opcode::HINS_mod_b:
+  case Opcode::HINS_mod_w:
+  case Opcode::HINS_mod_l:
+  case Opcode::HINS_mod_q:
+    HANDLE_BINOP_CHECKRIGHT( %, Opcode::HINS_mod_b, if ( right == 0 ) throw SimError( "mod by 0", ins.get_loc() ) );
     break;
 
   case Opcode::HINS_jmp:
