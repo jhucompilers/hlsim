@@ -89,6 +89,25 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
     }
     break;
   
+  case Opcode::HINS_add_b:
+  case Opcode::HINS_add_w:
+  case Opcode::HINS_add_l:
+  case Opcode::HINS_add_q:
+    {
+      unsigned operand_size = get_operand_size( ins.get_opcode(), Opcode::HINS_add_b );
+      Frame *cur_frame = m_stack.get_top();
+      uint64_t left, right, sum;
+      left = load_source( cur_frame, ins.at(1), operand_size, ins.get_loc() );
+      right = load_source( cur_frame, ins.at(2), operand_size, ins.get_loc() );
+      sum = left + right;
+      store_dest( cur_frame, ins.at(0), operand_size, sum, ins.get_loc() );
+    }
+    break;
+
+  case Opcode::HINS_jmp:
+    next = ins.at(0).get_target_offset();
+    break;
+
   default:
     throw SimError( "instruction not simulated yet", ins.get_loc() );
   }

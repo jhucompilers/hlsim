@@ -34,6 +34,9 @@ public:
   bool is_memref() const;
   std::string get_label() const;
 
+  bool is_assignable() const;
+  bool is_readable() const;
+
   // Set the instruction offset of the instruction targeted by a
   // control flow label.
   void set_target_offset( unsigned offset );

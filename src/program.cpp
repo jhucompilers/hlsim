@@ -23,6 +23,7 @@ const std::unordered_map<Opcode, std::vector<OperandKind>> s_instruction_formats
   { Opcode::HINS_ret, {} },
   { Opcode::HINS_call, { OperandKind::LABEL } },
   { Opcode::HINS_localaddr, { OperandKind::VREG, OperandKind::IMM } },
+  { Opcode::HINS_jmp, { OperandKind::LABEL } },
 };
 
 }
@@ -68,7 +69,7 @@ void Program::validate_instruction( const Function &fn, Instruction &ins ) const
     for ( size_t j = 0; j < expected.size(); ++j ) {
       const Operand &operand = ins.at( j );
       if ( operand.get_kind() != expected[j] )
-        throw SimError( "", ins.get_loc() );
+        throw SimError( "invalid operand " + std::to_string(j+1), ins.get_loc() );
     }
   } else {
     // Instruction has multiple valid forms
@@ -109,6 +110,30 @@ void Program::validate_instruction_variable_format( const Function &fn, Instruct
     validate_mov( fn, ins );
     break;
 
+  // All binary operator instructions
+  case Opcode::HINS_add_b:
+  case Opcode::HINS_add_w:
+  case Opcode::HINS_add_l:
+  case Opcode::HINS_add_q:
+  case Opcode::HINS_sub_b:
+  case Opcode::HINS_sub_w:
+  case Opcode::HINS_sub_l:
+  case Opcode::HINS_sub_q:
+  case Opcode::HINS_mul_b:
+  case Opcode::HINS_mul_w:
+  case Opcode::HINS_mul_l:
+  case Opcode::HINS_mul_q:
+  case Opcode::HINS_div_b:
+  case Opcode::HINS_div_w:
+  case Opcode::HINS_div_l:
+  case Opcode::HINS_div_q:
+  case Opcode::HINS_mod_b:
+  case Opcode::HINS_mod_w:
+  case Opcode::HINS_mod_l:
+  case Opcode::HINS_mod_q:
+    validate_binop( fn, ins );
+    break;
+
   default:
     throw SimError( "don't know how to validate " + std::to_string(int(ins.get_opcode())), ins.get_loc() );
   }
@@ -119,14 +144,28 @@ void Program::validate_mov( const Function &fn, Instruction &ins ) const {
   if ( ins.get_num_operands() != 2 )
     throw SimError( "wrong number of operands", ins.get_loc() );
   
-  // The destination operand must be a vreg or a memory reference
+  // The destination operand must be assignable
   const Operand &dest = ins.at( 0 );
-  if ( dest.get_kind() != OperandKind::VREG && dest.get_kind() != OperandKind::VREG_MEMREF )
+  if ( !dest.is_assignable() )
     throw SimError( "invalid destination operand", ins.get_loc() );
 
-  // The source operand must not be a label
+  // The source operand must be readable
   const Operand &src = ins.at( 1 );
-  if ( src.get_kind() == OperandKind::LABEL )
+  if ( !src.is_readable() )
+    throw SimError( "invalid source operand", ins.get_loc() );
+}
+
+void Program::validate_binop( const Function &fn, Instruction &ins ) const {
+  // There must be exactly 3 operands
+  if ( ins.get_num_operands() != 3 )
+    throw SimError( "instruction should have exactly 3 operands", ins.get_loc() );
+
+  // The destination operand must be assignable
+  if ( !ins.at(0).is_assignable() )
+    throw SimError( "invalid destination operand", ins.get_loc() );
+
+  // The source operands must be readable
+  if ( !ins.at(1).is_readable() || !ins.at(2).is_readable() )
     throw SimError( "invalid source operand", ins.get_loc() );
 }
 

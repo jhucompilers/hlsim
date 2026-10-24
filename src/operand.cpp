@@ -61,6 +61,14 @@ std::string Operand::get_label() const {
   return m_label;
 }
 
+bool Operand::is_assignable() const {
+  return m_kind == OperandKind::VREG || m_kind == OperandKind::VREG_MEMREF;
+}
+
+bool Operand::is_readable() const {
+  return is_assignable() || m_kind == OperandKind::IMM;
+}
+
 void Operand::set_target_offset( unsigned offset ) {
   assert( m_kind == OperandKind::LABEL );
   m_ival = offset;
