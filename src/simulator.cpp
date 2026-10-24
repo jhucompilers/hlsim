@@ -136,6 +136,48 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
     execute_scmp( ins, get_operand_size( ins.get_opcode(), Opcode::HINS_cmpgte_b ), Compare::GTE );
     break;
 
+  case Opcode::HINS_ucmplt_b:
+  case Opcode::HINS_ucmplt_w:
+  case Opcode::HINS_ucmplt_l:
+  case Opcode::HINS_ucmplt_q:
+    execute_ucmp( ins, get_operand_size( ins.get_opcode(), Opcode::HINS_ucmplt_b ), Compare::LT );
+    break;
+
+  case Opcode::HINS_ucmplte_b:
+  case Opcode::HINS_ucmplte_w:
+  case Opcode::HINS_ucmplte_l:
+  case Opcode::HINS_ucmplte_q:
+    execute_ucmp( ins, get_operand_size( ins.get_opcode(), Opcode::HINS_ucmplte_b ), Compare::LTE );
+    break;
+
+  case Opcode::HINS_ucmpgt_b:
+  case Opcode::HINS_ucmpgt_w:
+  case Opcode::HINS_ucmpgt_l:
+  case Opcode::HINS_ucmpgt_q:
+    execute_ucmp( ins, get_operand_size( ins.get_opcode(), Opcode::HINS_ucmpgt_b ), Compare::GT );
+    break;
+
+  case Opcode::HINS_ucmpgte_b:
+  case Opcode::HINS_ucmpgte_w:
+  case Opcode::HINS_ucmpgte_l:
+  case Opcode::HINS_ucmpgte_q:
+    execute_ucmp( ins, get_operand_size( ins.get_opcode(), Opcode::HINS_ucmpgte_b ), Compare::GTE );
+    break;
+
+  case Opcode::HINS_cmpeq_b:
+  case Opcode::HINS_cmpeq_w:
+  case Opcode::HINS_cmpeq_l:
+  case Opcode::HINS_cmpeq_q:
+    execute_ucmp( ins, get_operand_size( ins.get_opcode(), Opcode::HINS_cmpeq_b ), Compare::EQ );
+    break;
+
+  case Opcode::HINS_cmpneq_b:
+  case Opcode::HINS_cmpneq_w:
+  case Opcode::HINS_cmpneq_l:
+  case Opcode::HINS_cmpneq_q:
+    execute_ucmp( ins, get_operand_size( ins.get_opcode(), Opcode::HINS_cmpneq_b ), Compare::NEQ );
+    break;
+
   case Opcode::HINS_cjmp_t:
   case Opcode::HINS_cjmp_f:
     {
@@ -214,6 +256,41 @@ void Simulator::execute_scmp( const Instruction &ins, unsigned operand_size, Com
     break;
   case Compare::NEQ:
     result = ( left != right );
+    break;
+  }
+
+  // Store result
+  store_dest( cur_frame, ins.at(0), 8, result, ins.get_loc() );
+}
+
+void Simulator::execute_ucmp( const Instruction &ins, unsigned operand_size, Compare cmp ) {
+  Frame *cur_frame = m_stack.get_top();
+
+  // Get left and right operand values
+  uint64_t uleft, uright;
+  uleft = load_source( cur_frame, ins.at(1), operand_size, ins.get_loc() );
+  uright = load_source( cur_frame, ins.at(2), operand_size, ins.get_loc() );
+
+  // Compare values
+  uint64_t result;
+  switch ( cmp ) {
+  case Compare::LT:
+    result = ( uleft < uright );
+    break;
+  case Compare::LTE:
+    result = ( uleft <= uright );
+    break;
+  case Compare::GT:
+    result = ( uleft > uright );
+    break;
+  case Compare::GTE:
+    result = ( uleft >= uright );
+    break;
+  case Compare::EQ:
+    result = ( uleft == uright );
+    break;
+  case Compare::NEQ:
+    result = ( uleft != uright );
     break;
   }
 
