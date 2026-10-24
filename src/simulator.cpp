@@ -66,6 +66,21 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
   case Opcode::HINS_leave:
     m_stack.get_top()->leave( ins.at(0).get_imm(), ins.get_loc() );
     break;
+
+  case Opcode::HINS_call:
+    {
+      // Look up called function
+      const Function *callee = m_program.lookup_fn( ins.at(0).get_label(), ins.get_loc() ).get();
+
+      // Compute base address for the called function's memory block
+      uint64_t base = ( m_stack.get_num_frames() + 1 ) * Block::ADDR_RANGE;
+
+      // Start function call
+      m_stack.call( base, m_cur_fn, callee, next );
+      m_cur_fn = callee;
+      next = 0;
+    }
+    break;
   
   case Opcode::HINS_ret:
     m_stack.ret( m_cur_fn, next );

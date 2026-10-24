@@ -26,6 +26,7 @@ const std::unordered_map<Opcode, std::vector<OperandKind>> s_instruction_formats
   { Opcode::HINS_jmp, { OperandKind::LABEL } },
   { Opcode::HINS_cjmp_t, { OperandKind::VREG, OperandKind::LABEL } },
   { Opcode::HINS_cjmp_f, { OperandKind::VREG, OperandKind::LABEL } },
+  { Opcode::HINS_call, { OperandKind::LABEL } },
 };
 
 }
