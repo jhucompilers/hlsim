@@ -34,6 +34,8 @@ private:
   uint64_t read_vreg( Frame *frame, int vreg_num ) const;
   void write_vreg( Frame *frame, int vreg_num, uint64_t val );
   uint64_t read_mem( uint64_t addr, unsigned operand_size, const Location &loc );
+  void write_mem( uint64_t addr, unsigned operand_size, uint64_t val, const Location &loc );
+  Frame *determine_frame( uint64_t addr, const char *op, const Location &loc );
   uint64_t trim( uint64_t val, unsigned operand_size ) const;
 };
 

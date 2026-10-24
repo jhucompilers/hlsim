@@ -60,3 +60,11 @@ const Instruction &Function::at( unsigned index ) const {
 int Function::get_highest_vreg_num() const {
   return m_highest_vreg_num;
 }
+
+void Function::set_end_loc( const Location &loc ) {
+  m_end_loc = loc;
+}
+
+const Location &Function::get_end_loc() const {
+  return m_end_loc;
+}

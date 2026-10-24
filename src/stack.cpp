@@ -139,6 +139,10 @@ Frame::~Frame() {
 
 }
 
+uint64_t Frame::get_base() const {
+  return m_base;
+}
+
 const Function *Frame::get_caller() const {
   return m_caller;
 }

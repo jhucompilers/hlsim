@@ -1,0 +1,10 @@
+  .section .text
+
+  .globl main
+main:
+  enter $16
+  localaddr vr10, $4
+  mov_l (vr10), $17
+  mov_l vr0, (vr10)
+  leave $16
+  ret

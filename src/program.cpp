@@ -22,6 +22,7 @@ const std::unordered_map<Opcode, std::vector<OperandKind>> s_instruction_formats
   { Opcode::HINS_leave, { OperandKind::IMM } },
   { Opcode::HINS_ret, {} },
   { Opcode::HINS_call, { OperandKind::LABEL } },
+  { Opcode::HINS_localaddr, { OperandKind::VREG, OperandKind::IMM } },
 };
 
 }
@@ -94,6 +95,9 @@ void Program::validate_instruction( const Function &fn, Instruction &ins ) const
       }
     }
   }
+
+  // Do any additional validation for specific instruction types
+  validate_instruction_extra( fn, ins );
 }
 
 void Program::validate_instruction_variable_format( const Function &fn, Instruction &ins ) const {
@@ -124,4 +128,16 @@ void Program::validate_mov( const Function &fn, Instruction &ins ) const {
   const Operand &src = ins.at( 1 );
   if ( src.get_kind() == OperandKind::LABEL )
     throw SimError( "invalid source operand", ins.get_loc() );
+}
+
+void Program::validate_instruction_extra( const Function &fn, Instruction &ins ) const {
+  switch ( ins.get_opcode() ) {
+  case Opcode::HINS_localaddr:
+    // offset must be non-negative
+    if ( ins.at(1).get_imm() < 0L )
+      throw SimError( "localaddr offset must be non-negative", ins.get_loc() );
+    break;
+  default:
+    break;
+  }
 }

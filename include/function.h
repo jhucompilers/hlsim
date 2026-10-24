@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <string>
 #include "instruction.h"
+#include "location.h"
 class Location;
 
 class Function {
@@ -17,6 +18,7 @@ private:
   // map of label names to instruction indices
   std::unordered_map< std::string, unsigned > m_labels;
   int m_highest_vreg_num;
+  Location m_end_loc;
 
   // No value semantics
   Function( const Function & ) = delete;
@@ -42,6 +44,9 @@ public:
   const Instruction &at( unsigned index ) const;
 
   int get_highest_vreg_num() const;
+
+  void set_end_loc( const Location &loc );
+  const Location &get_end_loc() const;
 };
 
 #endif // FUNCTION_H

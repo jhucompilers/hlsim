@@ -67,6 +67,8 @@ public:
   Frame( uint64_t base, const Function *caller, const Function *callee, unsigned ret_ins_offset );
   ~Frame();
 
+  uint64_t get_base() const;
+
   const Function *get_caller() const;
   const Function *get_callee() const;
   unsigned get_ret_ins_offset() const;

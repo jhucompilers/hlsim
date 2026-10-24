@@ -44,7 +44,8 @@ uint64_t Simulator::execute() {
   unsigned pc = 0;
 
   while ( !m_done ) {
-    assert( pc < unsigned( m_cur_fn->get_num_instructions() ) );
+    if ( pc >= m_cur_fn->get_num_instructions() )
+      throw SimError( "pc is past end of instructions in function " + m_cur_fn->get_name(), m_cur_fn->get_end_loc() );
     const Instruction &ins = m_cur_fn->at( pc );
     pc = execute_ins( ins, pc );
   }
@@ -77,6 +78,15 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
   case Opcode::HINS_mov_l:
   case Opcode::HINS_mov_q:
     execute_mov( ins );
+    break;
+  
+  case Opcode::HINS_localaddr:
+    {
+      Frame *cur_frame = m_stack.get_top();
+      uint64_t offset = uint64_t( ins.at(1).get_imm() ); // localaddr offsets are always positive
+      uint64_t addr = cur_frame->get_base() + offset;
+      write_vreg( cur_frame, ins.at(0).get_vreg(), addr );
+    }
     break;
   
   default:
@@ -118,10 +128,9 @@ void Simulator::store_dest( Frame *frame, const Operand &operand, unsigned opera
   case OperandKind::VREG:
     write_vreg( frame, operand.get_vreg(), trim( val, operand_size ) );
     break;
-
   case OperandKind::VREG_MEMREF:
-    throw SimError( "writes to memory not supported yet", loc );
-
+    write_mem( read_vreg( frame, operand.get_vreg() ), operand_size, val, loc );
+    break;
   default:
     assert( false );
   }
@@ -144,33 +153,21 @@ void Simulator::write_vreg( Frame *frame, int vreg_num, uint64_t val ) {
 }
 
 uint64_t Simulator::read_mem( uint64_t addr, unsigned operand_size, const Location &loc ) {
-  // Determine which stack frame should contain the memory location
-  // named by the address.
-  uint64_t frame_num = ( addr >> Block::ADDR_RANGE_SHIFT );
-  if ( frame_num == 0U )
-    throw SimError( "read of invalid address " + Stack::to_hex( addr ) + " (null pointer deref?)", loc );
-   // frame number "1" corresponds to the stack frame for the
-   // main function (frame number 0 is not used)
-  --frame_num;
-
-  if ( frame_num >= m_stack.get_num_frames() )
-    throw SimError( "read of invalid address " + Stack::to_hex( addr ), loc );
-
-  Frame *frame = m_stack.get_frame( frame_num );
-
+  Frame *frame = determine_frame( addr, "read", loc );
+  Block *block = frame->get_block( loc );
   uint64_t val;
   switch ( operand_size ) {
   case 1:
-    val = frame->get_block( loc )->loadb( addr, loc );
+    val = block->loadb( addr, loc );
     break;
   case 2:
-    val = frame->get_block( loc )->loadw( addr, loc );
+    val = block->loadw( addr, loc );
     break;
   case 4:
-    val = frame->get_block( loc )->loadl( addr, loc );
+    val = block->loadl( addr, loc );
     break;
   case 8:
-    val = frame->get_block( loc )->loadq( addr, loc );
+    val = block->loadq( addr, loc );
     break;
   default:
     assert( false );
@@ -178,6 +175,43 @@ uint64_t Simulator::read_mem( uint64_t addr, unsigned operand_size, const Locati
   }
 
   return val;
+}
+
+void Simulator::write_mem( uint64_t addr, unsigned operand_size, uint64_t val, const Location &loc ) {
+  Frame *frame = determine_frame( addr, "write", loc );
+  Block *block = frame->get_block( loc );
+  switch ( operand_size ) {
+  case 1:
+    block->storeb( addr, uint8_t( val ), loc );
+    break;
+  case 2:
+    block->storew( addr, uint16_t( val ), loc );
+    break;
+  case 4:
+    block->storel( addr, uint32_t( val ), loc );
+    break;
+  case 8:
+    block->storeq( addr, uint64_t( val ), loc );
+    break;
+  default:
+    assert( false );
+  }
+}
+
+// Determine which stack frame should contain the memory location
+// named by the address.
+Frame *Simulator::determine_frame( uint64_t addr, const char *op, const Location &loc ) {
+  uint64_t frame_num = ( addr >> Block::ADDR_RANGE_SHIFT );
+  if ( frame_num == 0U )
+    throw SimError( std::string( op ) + " of invalid address " + Stack::to_hex( addr ) + " (null pointer deref?)", loc );
+   // frame number "1" corresponds to the stack frame for the
+   // main function (frame number 0 is not used)
+  --frame_num;
+
+  if ( frame_num >= m_stack.get_num_frames() )
+    throw SimError( std::string( op ) + " of invalid address " + Stack::to_hex( addr ), loc );
+
+  return m_stack.get_frame( frame_num );
 }
 
 uint64_t Simulator::trim( uint64_t val, unsigned operand_size ) const {
