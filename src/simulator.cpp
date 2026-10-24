@@ -22,6 +22,24 @@ unsigned get_operand_size( Opcode opcode, Opcode base_opcode ) {
   return OPERAND_SIZES[ offset ];
 }
 
+// Sign-extend a signed value of given size (with bits stored in a uint64_t)
+// to int64_t
+int64_t sign_extend( uint64_t val, unsigned operand_size ) {
+  switch ( operand_size ) {
+  case 1:
+    return int8_t( val & 0xFF );
+  case 2:
+    return int16_t( val & 0xFFFF );
+  case 4:
+    return int32_t( val & 0xFFFFFFFF );
+  case 8:
+    return int64_t( val );
+  default:
+    assert( false );
+    return -1;
+  }
+}
+
 };
 
 Simulator::Simulator( const Program &program )
@@ -54,6 +72,17 @@ uint64_t Simulator::execute() {
   // of the program
   return m_global_vregs[0];
 }
+
+#define HANDLE_BINOP(op, base_opcode) \
+    { \
+      unsigned operand_size = get_operand_size( ins.get_opcode(), base_opcode ); \
+      Frame *cur_frame = m_stack.get_top(); \
+      uint64_t left, right, result; \
+      left = load_source( cur_frame, ins.at(1), operand_size, ins.get_loc() ); \
+      right = load_source( cur_frame, ins.at(2), operand_size, ins.get_loc() ); \
+      result = left op right; \
+      store_dest( cur_frame, ins.at(0), operand_size, result, ins.get_loc() ); \
+    }
 
 unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
   unsigned next = pc + 1;
@@ -94,6 +123,54 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
   case Opcode::HINS_mov_q:
     execute_mov( ins );
     break;
+
+  case Opcode::HINS_sconv_bw:
+    execute_sconv( ins, 1, 2 );
+    break;
+
+  case Opcode::HINS_sconv_bl:
+    execute_sconv( ins, 1, 4 );
+    break;
+
+  case Opcode::HINS_sconv_bq:
+    execute_sconv( ins, 1, 8 );
+    break;
+
+  case Opcode::HINS_sconv_wl:
+    execute_sconv( ins, 2, 4 );
+    break;
+
+  case Opcode::HINS_sconv_wq:
+    execute_sconv( ins, 2, 8 );
+    break;
+
+  case Opcode::HINS_sconv_lq:
+    execute_sconv( ins, 4, 8 );
+    break;
+
+  case Opcode::HINS_uconv_bw:
+    execute_uconv( ins, 1, 2 );
+    break;
+
+  case Opcode::HINS_uconv_bl:
+    execute_uconv( ins, 1, 4 );
+    break;
+
+  case Opcode::HINS_uconv_bq:
+    execute_uconv( ins, 1, 8 );
+    break;
+
+  case Opcode::HINS_uconv_wl:
+    execute_uconv( ins, 2, 4 );
+    break;
+
+  case Opcode::HINS_uconv_wq:
+    execute_uconv( ins, 2, 8 );
+    break;
+
+  case Opcode::HINS_uconv_lq:
+    execute_uconv( ins, 4, 8 );
+    break;
   
   case Opcode::HINS_localaddr:
     {
@@ -108,15 +185,21 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
   case Opcode::HINS_add_w:
   case Opcode::HINS_add_l:
   case Opcode::HINS_add_q:
-    {
-      unsigned operand_size = get_operand_size( ins.get_opcode(), Opcode::HINS_add_b );
-      Frame *cur_frame = m_stack.get_top();
-      uint64_t left, right, sum;
-      left = load_source( cur_frame, ins.at(1), operand_size, ins.get_loc() );
-      right = load_source( cur_frame, ins.at(2), operand_size, ins.get_loc() );
-      sum = left + right;
-      store_dest( cur_frame, ins.at(0), operand_size, sum, ins.get_loc() );
-    }
+    HANDLE_BINOP( +, Opcode::HINS_add_b );
+    break;
+
+  case Opcode::HINS_sub_b:
+  case Opcode::HINS_sub_w:
+  case Opcode::HINS_sub_l:
+  case Opcode::HINS_sub_q:
+    HANDLE_BINOP( -, Opcode::HINS_sub_b );
+    break;
+
+  case Opcode::HINS_mul_b:
+  case Opcode::HINS_mul_w:
+  case Opcode::HINS_mul_l:
+  case Opcode::HINS_mul_q:
+    HANDLE_BINOP( *, Opcode::HINS_mul_b );
     break;
 
   case Opcode::HINS_jmp:
@@ -218,6 +301,19 @@ void Simulator::execute_mov( const Instruction &ins ) {
   store_dest( frame, ins.at( 0 ), operand_size, val, ins.get_loc() );
 }
 
+void Simulator::execute_sconv( const Instruction &ins, unsigned src_operand_size, unsigned dest_operand_size) {
+  Frame *cur_frame = m_stack.get_top();
+  uint64_t val = load_source( cur_frame, ins.at(1), src_operand_size, ins.get_loc() );
+  int64_t sval = sign_extend( val, src_operand_size );
+  store_dest( cur_frame, ins.at(0), dest_operand_size, uint64_t( sval ), ins.get_loc() );
+}
+
+void Simulator::execute_uconv( const Instruction &ins, unsigned src_operand_size, unsigned dest_operand_size ) {
+  Frame *cur_frame = m_stack.get_top();
+  uint64_t val = load_source( cur_frame, ins.at(1), src_operand_size, ins.get_loc() );
+  store_dest( cur_frame, ins.at(0), dest_operand_size, val, ins.get_loc() );
+}
+
 void Simulator::execute_scmp( const Instruction &ins, unsigned operand_size, Compare cmp ) {
   Frame *cur_frame = m_stack.get_top();
 
@@ -227,29 +323,7 @@ void Simulator::execute_scmp( const Instruction &ins, unsigned operand_size, Com
   uright = load_source( cur_frame, ins.at(2), operand_size, ins.get_loc() );
 
   // Convert to signed values, sign-extending to 64 bits as appropriate
-  int64_t left, right;
-  switch ( operand_size ) {
-  case 1:
-    left = int8_t( uleft & 0xFF );
-    right = int8_t( uright & 0xFF );
-    break;
-  case 2:
-    left = int16_t( uleft & 0xFFFF );
-    right = int16_t( uright & 0xFFFF );
-    break;
-  case 4:
-    left = int32_t( uleft & 0xFFFFFFFF );
-    right = int32_t( uright & 0xFFFFFFFF );
-    break;
-  case 8:
-    left = int64_t( uleft );
-    right = int64_t( uright );
-    break;
-  default:
-    assert( false );
-    left = 0;
-    right = 0;
-  }
+  int64_t left = sign_extend( uleft, operand_size ), right = sign_extend( uright, operand_size );
 
   // Do the comparison
   uint64_t result;

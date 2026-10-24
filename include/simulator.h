@@ -32,6 +32,8 @@ private:
 
   unsigned execute_ins( const Instruction &ins, unsigned pc );
   void execute_mov( const Instruction &ins );
+  void execute_sconv( const Instruction &ins, unsigned src_operand_size, unsigned dest_operand_size );
+  void execute_uconv( const Instruction &ins, unsigned src_operand_size, unsigned dest_operand_size );
   void execute_scmp( const Instruction &ins, unsigned operand_size, Compare cmp );
   void execute_ucmp( const Instruction &ins, unsigned operand_size, Compare cmp );
   uint64_t load_source( Frame *frame, const Operand &operand, unsigned operand_size, const Location &loc );
