@@ -45,7 +45,7 @@ public:
 
   int get_highest_vreg_num() const;
 
-  void set_end_loc( const Location &loc );
+  //void set_end_loc( const Location &loc );
   const Location &get_end_loc() const;
 };
 

@@ -29,6 +29,9 @@ int execute( int argc, char **argv ) {
   // We can close the input now
   in.close();
 
+  // Add implementations of intrinsic (runtime) functions
+  program.add_intrinsics();
+
   // Validate the program
   program.validate();
 

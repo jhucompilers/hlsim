@@ -31,6 +31,11 @@ void Function::add_instruction( const Instruction &ins ) {
       if ( operand.get_vreg() > m_highest_vreg_num )
         m_highest_vreg_num = operand.get_vreg();
   }
+
+  // Update end location
+  const Location &loc = ins.get_loc();
+  if ( loc.get_line() > m_end_loc.get_line() )
+    m_end_loc = ins.get_loc();
 }
 
 unsigned Function::lookup_label( const std::string &label, const Location &loc ) const {
@@ -59,10 +64,6 @@ const Instruction &Function::at( unsigned index ) const {
 
 int Function::get_highest_vreg_num() const {
   return m_highest_vreg_num;
-}
-
-void Function::set_end_loc( const Location &loc ) {
-  m_end_loc = loc;
 }
 
 const Location &Function::get_end_loc() const {

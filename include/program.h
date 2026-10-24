@@ -31,6 +31,9 @@ public:
   // time)
   void validate() const;
 
+  // Add implementations of intrinsic (runtime) functions
+  void add_intrinsics();
+
 private:
   void validate_instruction( const Function &fn, Instruction &ins ) const;
   void validate_instruction_variable_format( const Function &fn, Instruction &ins ) const;

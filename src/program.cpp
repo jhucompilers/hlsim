@@ -1,3 +1,4 @@
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include "function.h"
@@ -27,6 +28,7 @@ const std::unordered_map<Opcode, std::vector<OperandKind>> s_instruction_formats
   { Opcode::HINS_cjmp_t, { OperandKind::VREG, OperandKind::LABEL } },
   { Opcode::HINS_cjmp_f, { OperandKind::VREG, OperandKind::LABEL } },
   { Opcode::HINS_call, { OperandKind::LABEL } },
+  { Opcode::HINS_read_i32, {} },
 };
 
 }
@@ -57,6 +59,15 @@ void Program::validate() const {
   for ( auto i = m_functions.begin(); i != m_functions.end(); ++i )
     for ( auto j = (*i)->begin(); j != (*i)->end(); ++j )
       validate_instruction( **i, *j );
+}
+
+void Program::add_intrinsics() {
+  Location loc( "<intrinsics>", 1, 1 );
+
+  std::shared_ptr<Function> read_i32 = std::make_shared<Function>( "read_i32" );
+  add_function( read_i32, loc ); 
+  read_i32->add_instruction( Instruction( Opcode::HINS_read_i32, loc++ ) );
+  read_i32->add_instruction( Instruction( Opcode::HINS_ret, loc++ ) );
 }
 
 void Program::validate_instruction( const Function &fn, Instruction &ins ) const {

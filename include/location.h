@@ -23,6 +23,8 @@ public:
 
   void advance( int c );
   void unadvance( int c );
+
+  Location operator++( int );
 };
 
 #endif // LOCATION_H

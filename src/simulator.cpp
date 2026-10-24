@@ -1,3 +1,4 @@
+#include <iostream>
 #include <cassert>
 #include "program.h"
 #include "location.h"
@@ -301,6 +302,15 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
       bool take_branch = ( ins.get_opcode() == Opcode::HINS_cjmp_t ) ? bool(boolval) : !bool(boolval);
       if ( take_branch )
         next = ins.at(1).get_target_offset();
+    }
+    break;
+
+  case Opcode::HINS_read_i32:
+    {
+      // Read one 32-bit signed integer value, and store it in vr0
+      int32_t val;
+      std::cin >> val;
+      m_global_vregs[0] = uint32_t( val );
     }
     break;
 

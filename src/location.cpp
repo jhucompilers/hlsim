@@ -70,3 +70,12 @@ void Location::unadvance( int c ) {
   } else
     --m_col;
 }
+
+// Advance by one line, and return the original Location.
+// This is useful for generating fake Locations
+// (e.g., for the generated implementations of intrinsic functions.)
+Location Location::operator++( int ) {
+  Location result = *this;
+  advance( '\n' );
+  return result;
+}

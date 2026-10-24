@@ -124,10 +124,6 @@ void Parser::parse_Ins() {
   m_cur_ins = Instruction( opcode, tok.get_loc() );
   parse_OptOperandList();
   m_cur_func->add_instruction( m_cur_ins );
-
-  // As Instructions are added, update the end location of
-  // the function
-  m_cur_func->set_end_loc( m_cur_ins.get_loc() );
 }
 
 void Parser::parse_OptOperandList() {
