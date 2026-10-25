@@ -15,6 +15,7 @@ namespace {
 // Instruction formats (expected number and kind of operands)
 // for instructions which have only one valid format.
 const std::unordered_map<Opcode, std::vector<OperandKind>> s_instruction_formats = {
+  { Opcode::HINS_nop, {} },
   { Opcode::HINS_enter, { OperandKind::IMM } },
   { Opcode::HINS_leave, { OperandKind::IMM } },
   { Opcode::HINS_ret, {} },
@@ -154,7 +155,7 @@ void Program::validate_instruction( const Function &fn, Instruction &ins ) const
     }
   } else {
     // Instruction has multiple valid forms
-    validate_instruction_variable_format( fn, ins );
+    validate_instruction_variable_format( ins );
   }
 
   // Make sure any referenced labels refer to something valid,
@@ -190,10 +191,10 @@ void Program::validate_instruction( const Function &fn, Instruction &ins ) const
   }
 
   // Do any additional validation for specific instruction types
-  validate_instruction_extra( fn, ins );
+  validate_instruction_extra( ins );
 }
 
-void Program::validate_instruction_variable_format( const Function &fn, Instruction &ins ) const {
+void Program::validate_instruction_variable_format( Instruction &ins ) const {
   switch ( ins.get_opcode() ) {
   // Moves of various kinds
   case Opcode::HINS_mov_b:
@@ -212,7 +213,7 @@ void Program::validate_instruction_variable_format( const Function &fn, Instruct
   case Opcode::HINS_uconv_wl:
   case Opcode::HINS_uconv_wq:
   case Opcode::HINS_uconv_lq:
-    validate_mov( fn, ins );
+    validate_mov( ins );
     break;
 
   // All binary operator instructions (there are a lot of these)
@@ -296,7 +297,31 @@ void Program::validate_instruction_variable_format( const Function &fn, Instruct
   case Opcode::HINS_cmpneq_w:
   case Opcode::HINS_cmpneq_l:
   case Opcode::HINS_cmpneq_q:
-    validate_binop( fn, ins );
+    validate_binop( ins );
+    break;
+
+  // Validate unary operations
+  case Opcode::HINS_neg_b:
+  case Opcode::HINS_neg_w:
+  case Opcode::HINS_neg_l:
+  case Opcode::HINS_neg_q:
+  case Opcode::HINS_not_b:
+  case Opcode::HINS_not_w:
+  case Opcode::HINS_not_l:
+  case Opcode::HINS_not_q:
+  case Opcode::HINS_compl_b:
+  case Opcode::HINS_compl_w:
+  case Opcode::HINS_compl_l:
+  case Opcode::HINS_compl_q:
+  case Opcode::HINS_inc_b:
+  case Opcode::HINS_inc_w:
+  case Opcode::HINS_inc_l:
+  case Opcode::HINS_inc_q:
+  case Opcode::HINS_dec_b:
+  case Opcode::HINS_dec_w:
+  case Opcode::HINS_dec_l:
+  case Opcode::HINS_dec_q:
+    validate_unop( ins );
     break;
 
   default:
@@ -304,7 +329,7 @@ void Program::validate_instruction_variable_format( const Function &fn, Instruct
   }
 }
 
-void Program::validate_mov( const Function &fn, Instruction &ins ) const {
+void Program::validate_mov( Instruction &ins ) const {
   // There must be two operands
   if ( ins.get_num_operands() != 2 )
     throw SimError( "wrong number of operands", ins.get_loc() );
@@ -320,7 +345,7 @@ void Program::validate_mov( const Function &fn, Instruction &ins ) const {
     throw SimError( "invalid source operand", ins.get_loc() );
 }
 
-void Program::validate_binop( const Function &fn, Instruction &ins ) const {
+void Program::validate_binop( Instruction &ins ) const {
   // There must be exactly 3 operands
   if ( ins.get_num_operands() != 3 )
     throw SimError( "instruction should have exactly 3 operands", ins.get_loc() );
@@ -334,7 +359,21 @@ void Program::validate_binop( const Function &fn, Instruction &ins ) const {
     throw SimError( "invalid source operand", ins.get_loc() );
 }
 
-void Program::validate_instruction_extra( const Function &fn, Instruction &ins ) const {
+void Program::validate_unop( Instruction &ins ) const {
+  // There must be exactly 2 operands
+  if ( ins.get_num_operands() != 2 )
+    throw SimError( "instruction should have exactly 2 operands", ins.get_loc() );
+
+  // The destination must be assignable
+  if ( !ins.at(0).is_assignable() )
+    throw SimError( "invalid destination operand", ins.get_loc() );
+
+  // The source operand must be readable
+  if ( !ins.at(1).is_readable() )
+    throw SimError( "invalid source operand", ins.get_loc() );
+}
+
+void Program::validate_instruction_extra( Instruction &ins ) const {
   switch ( ins.get_opcode() ) {
   case Opcode::HINS_localaddr:
     // offset must be non-negative

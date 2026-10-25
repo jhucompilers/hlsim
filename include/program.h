@@ -51,10 +51,11 @@ public:
 
 private:
   void validate_instruction( const Function &fn, Instruction &ins ) const;
-  void validate_instruction_variable_format( const Function &fn, Instruction &ins ) const;
-  void validate_mov( const Function &fn, Instruction &ins ) const;
-  void validate_binop( const Function &fn, Instruction &ins ) const;
-  void validate_instruction_extra( const Function &fn, Instruction &ins ) const;
+  void validate_instruction_variable_format( Instruction &ins ) const;
+  void validate_mov( Instruction &ins ) const;
+  void validate_binop( Instruction &ins ) const;
+  void validate_unop( Instruction &ins ) const;
+  void validate_instruction_extra( Instruction &ins ) const;
 };
 
 #endif // PROGRAM_H

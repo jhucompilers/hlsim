@@ -93,6 +93,10 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
   unsigned next = pc + 1;
 
   switch ( ins.get_opcode() ) {
+  case Opcode::HINS_nop:
+    // do nothing
+    break;
+
   case Opcode::HINS_enter:
     m_stack.get_top()->enter( ins.at(0).get_imm(), ins.get_loc() );
     break;
@@ -294,6 +298,41 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
   case Opcode::HINS_cmpneq_q:
     execute_ucmp( ins, get_operand_size( ins.get_opcode(), Opcode::HINS_cmpneq_b ), Compare::NEQ );
     break;
+
+  case Opcode::HINS_neg_b:
+  case Opcode::HINS_neg_w:
+  case Opcode::HINS_neg_l:
+  case Opcode::HINS_neg_q:
+    {
+      unsigned operand_size = get_operand_size( ins.get_opcode(), Opcode::HINS_neg_b );
+      Frame *cur_frame = m_stack.get_top();
+      uint64_t val = load_source( cur_frame, ins.at(1), operand_size, ins.get_loc() );
+      // Two's complement negation
+      val = ~val;
+      ++val;
+      store_dest( cur_frame, ins.at(0), operand_size, val, ins.get_loc() );
+    }
+    break;
+
+  /*
+  case Opcode::HINS_not_b:
+  case Opcode::HINS_not_w:
+  case Opcode::HINS_not_l:
+  case Opcode::HINS_not_q:
+  case Opcode::HINS_compl_b:
+  case Opcode::HINS_compl_w:
+  case Opcode::HINS_compl_l:
+  case Opcode::HINS_compl_q:
+
+  case Opcode::HINS_inc_b:
+  case Opcode::HINS_inc_w:
+  case Opcode::HINS_inc_l:
+  case Opcode::HINS_inc_q:
+  case Opcode::HINS_dec_b:
+  case Opcode::HINS_dec_w:
+  case Opcode::HINS_dec_l:
+  case Opcode::HINS_dec_q:
+  */
 
   case Opcode::HINS_cjmp_t:
   case Opcode::HINS_cjmp_f:
