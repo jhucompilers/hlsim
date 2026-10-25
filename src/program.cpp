@@ -12,15 +12,6 @@
 
 namespace {
 
-/*
-const std::unordered_map<OperandKind, std::string> s_operand_format_names = {
-  { OperandKind::VREG, "virtual register" },
-  { OperandKind::VREG_MEMREF, "virtual register memory reference" },
-  { OperandKind::IMM, "immediate" },
-  { OperandKind::LABEL, "label" },
-};
-*/
-
 // Instruction formats (expected number and kind of operands)
 // for instructions which have only one valid format.
 const std::unordered_map<Opcode, std::vector<OperandKind>> s_instruction_formats = {
@@ -35,6 +26,8 @@ const std::unordered_map<Opcode, std::vector<OperandKind>> s_instruction_formats
   { Opcode::HINS_call, { OperandKind::LABEL } },
   { Opcode::HINS_read_i32, {} },
   { Opcode::HINS_print_str, {} },
+  { Opcode::HINS_print_nl, {} },
+  { Opcode::HINS_print_i32, {} },
 };
 
 }
@@ -132,6 +125,16 @@ void Program::add_intrinsics() {
   add_function( print_str, loc );
   print_str->add_instruction( Instruction( Opcode::HINS_print_str, loc++ ) );
   print_str->add_instruction( Instruction( Opcode::HINS_ret, loc++ ) );
+
+  std::shared_ptr<Function> print_nl = std::make_shared<Function>( "print_nl" );
+  add_function( print_nl, loc );
+  print_nl->add_instruction( Instruction( Opcode::HINS_print_nl, loc++ ) );
+  print_nl->add_instruction( Instruction( Opcode::HINS_ret, loc++ ) );
+
+  std::shared_ptr<Function> print_i32 = std::make_shared<Function>( "print_i32" );
+  add_function( print_i32, loc );
+  print_i32->add_instruction( Instruction( Opcode::HINS_print_i32, loc++ ) );
+  print_i32->add_instruction( Instruction( Opcode::HINS_ret, loc++ ) );
 }
 
 void Program::validate_instruction( const Function &fn, Instruction &ins ) const {

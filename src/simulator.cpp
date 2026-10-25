@@ -330,6 +330,18 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
     }
     break;
 
+  case Opcode::HINS_print_nl:
+    std::cout << "\n";
+    break;
+
+  case Opcode::HINS_print_i32:
+    {
+      // Print signed 32 bit integer in vr1.
+      int32_t val = int32_t( m_global_vregs[1] );
+      std::cout << val;
+    }
+    break;
+
   default:
     throw SimError( "instruction not simulated yet", ins.get_loc() );
   }

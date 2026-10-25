@@ -144,6 +144,8 @@ enum class Opcode {
   // the runtime support functions (read_i32(), etc.)
   HINS_read_i32,
   HINS_print_str,
+  HINS_print_nl,
+  HINS_print_i32,
 };
 
 Opcode opcode_from_s( const std::string &s );
