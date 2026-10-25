@@ -34,6 +34,7 @@ const std::unordered_map<Opcode, std::vector<OperandKind>> s_instruction_formats
   { Opcode::HINS_cjmp_f, { OperandKind::VREG, OperandKind::LABEL } },
   { Opcode::HINS_call, { OperandKind::LABEL } },
   { Opcode::HINS_read_i32, {} },
+  { Opcode::HINS_print_str, {} },
 };
 
 }
@@ -71,6 +72,19 @@ void Program::define_string_literal( const std::string &name, const std::string 
 
 unsigned Program::get_str_pool_size() const {
   return m_str_pool_size;
+}
+
+const char *Program::get_str_lit_ptr( uint64_t addr, const Location &loc ) const {
+  // Make sure the address is in the valid address range
+  // for string literals in the string pool
+  uint64_t str_addr_base = Block::ADDR_RANGE / 2;
+  if ( addr < str_addr_base || addr >= ( str_addr_base + m_str_pool_size ) )
+    throw SimError( "Invalid string literal address " + Stack::to_hex( addr ), loc );
+
+  uint64_t offset = addr - str_addr_base;
+  assert( offset < m_str_pool_size );
+
+  return m_str_pool.get() + offset;
 }
 
 void Program::create_string_pool() {
@@ -113,6 +127,11 @@ void Program::add_intrinsics() {
   add_function( read_i32, loc ); 
   read_i32->add_instruction( Instruction( Opcode::HINS_read_i32, loc++ ) );
   read_i32->add_instruction( Instruction( Opcode::HINS_ret, loc++ ) );
+
+  std::shared_ptr<Function> print_str = std::make_shared<Function>( "print_str" );
+  add_function( print_str, loc );
+  print_str->add_instruction( Instruction( Opcode::HINS_print_str, loc++ ) );
+  print_str->add_instruction( Instruction( Opcode::HINS_ret, loc++ ) );
 }
 
 void Program::validate_instruction( const Function &fn, Instruction &ins ) const {

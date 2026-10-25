@@ -143,6 +143,7 @@ enum class Opcode {
   // Simulator-specific instructions for simulating
   // the runtime support functions (read_i32(), etc.)
   HINS_read_i32,
+  HINS_print_str,
 };
 
 Opcode opcode_from_s( const std::string &s );

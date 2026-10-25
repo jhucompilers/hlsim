@@ -315,6 +315,21 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
     }
     break;
 
+  case Opcode::HINS_print_str:
+    {
+      // Print the string pointed to by the pointer value in vr1.
+
+      // Note: we assume that this intrinsic will only every be used
+      // to print string literals. If we wanted to allow printing
+      // of strings created dynamically in program memory, we would
+      // need to to handle addresses resolving to stack memory.
+
+      uint64_t str_ptr = m_global_vregs[1];
+      const char *s = m_program.get_str_lit_ptr( str_ptr, ins.get_loc() );
+      std::cout << s;
+    }
+    break;
+
   default:
     throw SimError( "instruction not simulated yet", ins.get_loc() );
   }
@@ -426,6 +441,11 @@ uint64_t Simulator::load_source( Frame *frame, const Operand &operand, unsigned 
     break;
   case OperandKind::IMM:
     val = uint64_t( operand.get_imm() );
+    break;
+  case OperandKind::IMM_LABEL:
+    // This must refer to a string constant
+    assert( operand.get_str_lit_addr() >= Block::ADDR_RANGE/2 );
+    val = operand.get_str_lit_addr();
     break;
   default:
     assert( false );

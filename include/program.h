@@ -34,6 +34,9 @@ public:
   void define_string_literal( const std::string &name, const std::string &str_value, const Location &loc );
   unsigned get_str_pool_size() const;
 
+  // Get a pointer to the string literal referred-to by given runtime address
+  const char *get_str_lit_ptr( uint64_t addr, const Location &loc ) const;
+
   // Create the string pool and determine addresses of
   // string literals
   void create_string_pool();
