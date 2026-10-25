@@ -4,7 +4,7 @@
 Operand::Operand( OperandKind kind, int64_t ival )
   : m_kind( kind )
   , m_ival( ival ) {
-  assert( kind != OperandKind::LABEL );
+  assert( kind != OperandKind::LABEL && kind != OperandKind::IMM_LABEL );
 }
 
 Operand::Operand( OperandKind kind, const std::string &label )
@@ -57,7 +57,7 @@ bool Operand::is_memref() const {
 }
 
 std::string Operand::get_label() const {
-  assert( m_kind == OperandKind::LABEL );
+  assert( m_kind == OperandKind::LABEL || m_kind == OperandKind::IMM_LABEL );
   return m_label;
 }
 
@@ -77,4 +77,14 @@ void Operand::set_target_offset( unsigned offset ) {
 unsigned Operand::get_target_offset() const {
   assert( m_ival >= 0 );
   return unsigned( m_ival );
+}
+
+void Operand::set_str_lit_addr( uint64_t addr ) {
+  assert( m_kind == OperandKind::IMM_LABEL );
+  m_ival = int64_t( addr );
+}
+
+uint64_t Operand::get_str_lit_addr() const {
+  assert( m_kind == OperandKind::IMM_LABEL );
+  return uint64_t( m_ival );
 }

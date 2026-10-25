@@ -201,7 +201,7 @@ void Parser::parse_Operand() {
   } else if ( tok.get_kind() == TokenKind::IMMEDIATE_LABEL) {
     // immediate label (i.e., specifying the memory address of a string constant)
     expect( TokenKind::IMMEDIATE_LABEL, tok );
-    m_cur_ins.append_operand( Operand( OperandKind::IMM_LABEL, tok.get_lexeme() ) );
+    m_cur_ins.append_operand( Operand( OperandKind::IMM_LABEL, tok.get_lexeme().substr( 1 ) ) );
   } else {
     // is a label
     expect( TokenKind::IDENT, tok );

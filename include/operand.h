@@ -45,6 +45,12 @@ public:
   // Get the instruction offset of the instruction targeted by a
   // label.
   unsigned get_target_offset() const;
+
+  // Set the address of a referenced string literal
+  void set_str_lit_addr( uint64_t addr );
+
+  // Get the address of a referenced string literal
+  uint64_t get_str_lit_addr() const;
 };
 
 #endif // OPERAND_H

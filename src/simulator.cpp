@@ -46,6 +46,7 @@ int64_t sign_extend( uint64_t val, unsigned operand_size ) {
 Simulator::Simulator( const Program &program )
   : m_program( program )
   , m_done( false ) {
+  // Initialize global vregs
   for ( int i = 0; i < 10; ++i )
     m_global_vregs[i] = uint64_t(0) - 1U;
 }

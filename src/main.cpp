@@ -32,6 +32,9 @@ int execute( int argc, char **argv ) {
   // Add implementations of intrinsic (runtime) functions
   program.add_intrinsics();
 
+  // Create the string pool
+  program.create_string_pool();
+
   // Validate the program
   program.validate();
 

@@ -1,20 +1,25 @@
 #include <memory>
 #include <string>
+#include <cstring>
+#include <cassert>
 #include <unordered_map>
 #include "function.h"
 #include "location.h"
 #include "instruction.h"
 #include "exceptions.h"
+#include "stack.h"
 #include "program.h"
 
 namespace {
 
+/*
 const std::unordered_map<OperandKind, std::string> s_operand_format_names = {
   { OperandKind::VREG, "virtual register" },
   { OperandKind::VREG_MEMREF, "virtual register memory reference" },
   { OperandKind::IMM, "immediate" },
   { OperandKind::LABEL, "label" },
 };
+*/
 
 // Instruction formats (expected number and kind of operands)
 // for instructions which have only one valid format.
@@ -33,7 +38,8 @@ const std::unordered_map<Opcode, std::vector<OperandKind>> s_instruction_formats
 
 }
 
-Program::Program() {
+Program::Program()
+  : m_str_pool_size( 0 ) {
 
 }
 
@@ -51,7 +57,7 @@ void Program::add_function( std::shared_ptr<Function> fn, const Location &loc ) 
 std::shared_ptr<Function> Program::lookup_fn( const std::string &fn_name, const Location &loc ) const {
   auto i = m_fn_map.find( fn_name );
   if ( i == m_fn_map.end() )
-    throw SimError( "unknown function name", loc );
+    throw SimError( "unknown function name '" + fn_name + "'", loc );
   return m_functions.at( i->second );
 }
 
@@ -61,6 +67,37 @@ void Program::define_string_literal( const std::string &name, const std::string 
     throw SimError( "duplicate string literal '" + name + "'", loc );
 
   m_string_literals[ name ] = str_value;
+}
+
+unsigned Program::get_str_pool_size() const {
+  return m_str_pool_size;
+}
+
+void Program::create_string_pool() {
+  // Determine the total size of the string pool
+  m_str_pool_size = 0;
+  for ( auto i = m_string_literals.begin(); i != m_string_literals.end(); ++i )
+    m_str_pool_size += ( i->second.size() + 1 );
+
+  // Allocate memory for the string values
+  m_str_pool = std::make_unique<char[]>( m_str_pool_size );
+
+  // Addresses of string literals start exactly halfway between 0
+  // and the base address of the first stack frame
+  uint64_t str_addr_base = Block::ADDR_RANGE / 2;
+
+  // Populate string pool memory, and build a map of string literal names
+  // to their addresses
+  unsigned offset = 0;
+  for ( auto i = m_string_literals.begin(); i != m_string_literals.end(); ++i ) {
+    const std::string &str_lit_name = i->first, &str_value = i->second;
+    char *p = m_str_pool.get() + offset;
+    unsigned str_value_size = str_value.size() + 1; // allow for NUL terminator
+    assert( offset + str_value_size <= m_str_pool_size );
+    std::strcpy( p, str_value.c_str() );
+    m_string_literal_addrs[ str_lit_name ] = str_addr_base + offset;
+    offset += str_value_size;
+  }
 }
 
 void Program::validate() const {
@@ -99,10 +136,12 @@ void Program::validate_instruction( const Function &fn, Instruction &ins ) const
   }
 
   // Make sure any referenced labels refer to something valid,
-  // and precompute the target instruction offsets for control flow
-  // instructions
+  // precompute the target instruction offsets for control flow
+  // instructions, and precompute addresses for referenced
+  // string literals
   for ( int i = 0; i < ins.get_num_operands(); ++i ) {
     Operand &operand = ins.at( unsigned(i) );
+
     if ( operand.get_kind() == OperandKind::LABEL ) {
       if ( ins.get_opcode() == Opcode::HINS_call ) {
         // This will throw an exception if there is no function with
@@ -116,6 +155,15 @@ void Program::validate_instruction( const Function &fn, Instruction &ins ) const
         unsigned target_offset = fn.lookup_label( operand.get_label(), ins.get_loc() );
         operand.set_target_offset( target_offset );
       }
+    }
+
+    if ( operand.get_kind() == OperandKind::IMM_LABEL ) {
+      // The only thing these can refer to is a string literal
+      auto i = m_string_literal_addrs.find( operand.get_label() );
+      if ( i == m_string_literal_addrs.end() )
+        throw SimError( "unknown string literal '" + operand.get_label() + "'", ins.get_loc() );
+      uint64_t str_lit_addr = i->second;
+      operand.set_str_lit_addr( str_lit_addr );
     }
   }
 
