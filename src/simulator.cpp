@@ -399,14 +399,30 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
     {
       // Print the string pointed to by the pointer value in vr1.
 
-      // Note: we assume that this intrinsic will only every be used
-      // to print string literals. If we wanted to allow printing
-      // of strings created dynamically in program memory, we would
-      // need to to handle addresses resolving to stack memory.
-
       uint64_t str_ptr = m_global_vregs[1];
-      const char *s = m_program.get_str_lit_ptr( str_ptr, ins.get_loc() );
-      std::cout << s;
+
+      if ( str_ptr >= Program::STR_POOL_BASE && str_ptr < Block::ADDR_RANGE ) {
+        // The pointer points to a location in the string pool
+        const char *s = m_program.get_str_lit_ptr( str_ptr, ins.get_loc() );
+        std::cout << s;
+      } else {
+        // See which stack frame the pointer falls in (if any)
+        Frame *frame = determine_frame( str_ptr, "read", ins.get_loc() );
+        Block *block = frame->get_block( ins.get_loc() );
+
+        // Get the characters of the string on character at a time
+        std::string str_value;
+        for (;;) {
+          uint8_t c = block->loadb( str_ptr, ins.get_loc() );
+          if ( c == 0 )
+            break;
+          str_value += char(c);
+          ++str_ptr;
+        }
+
+        // Print the string
+        std::cout << str_value;
+      }
     }
     break;
 
