@@ -422,6 +422,27 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
     }
     break;
 
+  case Opcode::HINS_read_i64:
+    {
+      // Read one 64-bit signed integer value, and store it in vr0
+      int64_t val;
+      std::cin >> val;
+      m_global_vregs[0] = uint64_t( val );
+    }
+    break;
+
+  case Opcode::HINS_print_i64:
+    {
+      // Print signed 32 bit integer in vr1.
+      int64_t val = int64_t( m_global_vregs[1] );
+      std::cout << val;
+    }
+    break;
+
+  case Opcode::HINS_print_space:
+    std::cout << " ";
+    break;
+
   default:
     throw SimError( "instruction not simulated yet", ins.get_loc() );
   }
