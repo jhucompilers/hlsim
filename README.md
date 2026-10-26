@@ -13,3 +13,8 @@ it is fairly complete, and successfully executes most of the
 test programs in the test repository. However, it's very possible
 that there are bugs. Please [let me know](mailto:daveho@cs.jhu.edu)
 if you run into any issues with the simulator.
+
+## License
+
+This program is free software distributed under the terms
+of the [GNU General Public License, Version 3](COPYING.txt).
