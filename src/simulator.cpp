@@ -536,7 +536,7 @@ uint64_t Simulator::load_source( Frame *frame, const Operand &operand, unsigned 
     break;
   case OperandKind::IMM_LABEL:
     // This must refer to a string constant
-    assert( operand.get_str_lit_addr() >= Block::ADDR_RANGE/2 );
+    assert( operand.get_str_lit_addr() >= Program::STR_POOL_BASE );
     val = operand.get_str_lit_addr();
     break;
   default:

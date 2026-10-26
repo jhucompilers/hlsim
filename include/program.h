@@ -6,12 +6,17 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
+#include "stack.h"
 
 class Function;
 class Location;
 class Instruction;
 
 class Program {
+public:
+  // Base address for the string pool (where string constants are stored)
+  static constexpr uint64_t STR_POOL_BASE = Block::ADDR_RANGE / 2;
+
 private:
   std::vector<std::shared_ptr<Function>> m_functions;
   std::unordered_map<std::string, unsigned> m_fn_map;

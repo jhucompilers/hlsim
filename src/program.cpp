@@ -74,7 +74,7 @@ unsigned Program::get_str_pool_size() const {
 const char *Program::get_str_lit_ptr( uint64_t addr, const Location &loc ) const {
   // Make sure the address is in the valid address range
   // for string literals in the string pool
-  uint64_t str_addr_base = Block::ADDR_RANGE / 2;
+  uint64_t str_addr_base = Program::STR_POOL_BASE;
   if ( addr < str_addr_base || addr >= ( str_addr_base + m_str_pool_size ) )
     throw SimError( "Invalid string literal address " + Stack::to_hex( addr ), loc );
 
@@ -95,7 +95,7 @@ void Program::create_string_pool() {
 
   // Addresses of string literals start exactly halfway between 0
   // and the base address of the first stack frame
-  uint64_t str_addr_base = Block::ADDR_RANGE / 2;
+  uint64_t str_addr_base = Program::STR_POOL_BASE;
 
   // Populate string pool memory, and build a map of string literal names
   // to their addresses
