@@ -120,7 +120,7 @@ public:
   void ret( const Function *&caller, unsigned &ret_ins_offset );
 
   // Get a pointer to the top Frame
-  Frame *get_top();
+  Frame *get_top() const;
 
   // Return how many Frames are currently on the stack
   unsigned get_num_frames() const;

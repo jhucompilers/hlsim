@@ -227,7 +227,7 @@ void Stack::ret( const Function *&caller, unsigned &ret_ins_offset ) {
   m_stack.pop_back();
 }
 
-Frame *Stack::get_top() {
+Frame *Stack::get_top() const {
   assert( !m_stack.empty() );
   return m_stack.back().get();
 }

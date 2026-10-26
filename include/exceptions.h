@@ -18,20 +18,25 @@
 #define EXCEPTIONS_H
 
 #include <stdexcept>
-#include "location.h"
+#include "stacktrace.h"
 
 class SimError : public std::runtime_error {
 private:
-  Location m_loc;
+  StackTrace m_stacktrace;
+  bool m_location_only;
 
 public:
   SimError( const std::string &msg, const Location &loc );
+  SimError( const std::string &msg, const StackTrace &stacktrace );
   SimError( const SimError &other );
   virtual ~SimError();
 
   SimError &operator=( const SimError &rhs );
 
   const Location &get_loc() const;
+
+  bool has_stacktrace() const;
+  const StackTrace &get_stacktrace() const;
 };
 
 #endif // EXCEPTIONS_H

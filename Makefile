@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS = -g -Wall -std=c++20 -Iinclude -Igensrc
 
 SRCS = main.cpp operand.cpp opcode.cpp instruction.cpp \
-	lexer.cpp parser.cpp location.cpp exceptions.cpp \
+	lexer.cpp parser.cpp location.cpp stacktrace.cpp exceptions.cpp \
 	program.cpp function.cpp simulator.cpp stack.cpp
 OBJS = $(SRCS:%.cpp=build/%.o)
 

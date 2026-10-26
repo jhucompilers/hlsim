@@ -14,18 +14,27 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "exceptions.h"
+#include <cassert>
 #include <stdexcept>
+#include "exceptions.h"
 
 SimError::SimError( const std::string &msg, const Location &loc )
   : std::runtime_error( msg )
-  , m_loc( loc ) {
+  , m_location_only( true ) {
+  m_stacktrace.append_loc( loc );
+}
 
+SimError::SimError( const std::string &msg, const StackTrace &stacktrace )
+  : std::runtime_error( msg )
+  , m_stacktrace( stacktrace )
+  , m_location_only( false ) {
+  assert( !stacktrace.empty() );
 }
 
 SimError::SimError( const SimError &other )
   : std::runtime_error( other )
-  , m_loc( other.m_loc ) {
+  , m_stacktrace( other.m_stacktrace )
+  , m_location_only( other.m_location_only ) {
 
 }
 
@@ -36,11 +45,21 @@ SimError::~SimError() {
 SimError &SimError::operator=( const SimError &rhs ) {
   if ( this != &rhs ) {
     std::runtime_error::operator=( rhs );
-    m_loc = rhs.m_loc;
+    m_stacktrace = rhs.m_stacktrace;
+    m_location_only = rhs.m_location_only;
   }
   return *this;
 }
 
 const Location &SimError::get_loc() const {
-  return m_loc;
+  assert( !m_stacktrace.empty() );
+  return *m_stacktrace.begin();
+}
+
+bool SimError::has_stacktrace() const {
+  return !m_location_only;
+}
+
+const StackTrace &SimError::get_stacktrace() const {
+  return m_stacktrace;
 }

@@ -706,3 +706,30 @@ uint64_t Simulator::trim( uint64_t val, unsigned operand_size ) const {
     return uint64_t(0) - 1U;
   }
 }
+
+void Simulator::create_stacktrace( StackTrace &stacktrace, const Instruction &ins ) const {
+  const Instruction *cur_ins = &ins;
+  int frame_num = int(m_stack.get_num_frames()) - 1;
+  assert( frame_num >= 0 );
+
+  const Frame *cur_frame = m_stack.get_frame( unsigned( frame_num ) );
+  const Function *cur_fn = cur_frame->get_callee();
+
+  for (;;) {
+    const Location &loc = cur_ins->get_loc();
+    std::string filename = loc.get_filename() + " (" + cur_fn->get_name() + ")";
+    int line = loc.get_line();
+    int col = loc.get_col();
+    stacktrace.append_loc( Location( filename, line, col ) );
+
+    if ( frame_num == 0 )
+      break;
+
+    // Go back to caller
+    unsigned ret_ins_offset = cur_frame->get_ret_ins_offset();
+    --frame_num;
+    cur_frame = m_stack.get_frame( unsigned( frame_num ) );
+    cur_fn = cur_frame->get_callee();
+    cur_ins = &cur_fn->at( ret_ins_offset );
+  }
+}

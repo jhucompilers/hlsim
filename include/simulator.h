@@ -19,6 +19,7 @@
 
 #include <cstdint>
 #include "stack.h"
+#include "stacktrace.h"
 class Program;
 class Instruction;
 class Operand;
@@ -60,6 +61,7 @@ private:
   void write_mem( uint64_t addr, unsigned operand_size, uint64_t val, const Location &loc );
   Frame *determine_frame( uint64_t addr, const char *op, const Location &loc );
   uint64_t trim( uint64_t val, unsigned operand_size ) const;
+  void create_stacktrace( StackTrace &stacktrace, const Instruction &ins ) const;
 };
 
 #endif // SIMULATOR_H
