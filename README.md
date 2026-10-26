@@ -14,6 +14,17 @@ test programs in the test repository. However, it's very possible
 that there are bugs. Please [let me know](mailto:daveho@cs.jhu.edu)
 if you run into any issues with the simulator.
 
+## Building
+
+To build the program, run the commands
+
+```
+make depend
+make -j
+```
+
+The executable is `build/hlsim`.
+
 ## License
 
 This program is free software distributed under the terms
