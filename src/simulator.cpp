@@ -234,6 +234,41 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
     HANDLE_BINOP_CHECKRIGHT( %, Opcode::HINS_mod_b, if ( right == 0 ) throw SimError( "mod by 0", ins.get_loc() ) );
     break;
 
+  case Opcode::HINS_lshift_b:
+  case Opcode::HINS_lshift_w:
+  case Opcode::HINS_lshift_l:
+  case Opcode::HINS_lshift_q:
+    HANDLE_BINOP_CHECKRIGHT( <<, Opcode::HINS_lshift_b, right = ( right & 0x3F ) );
+    break;
+
+  case Opcode::HINS_rshift_b:
+  case Opcode::HINS_rshift_w:
+  case Opcode::HINS_rshift_l:
+  case Opcode::HINS_rshift_q:
+    HANDLE_BINOP_CHECKRIGHT( >>, Opcode::HINS_rshift_b, right = ( right & 0x3F ) );
+    break;
+
+  case Opcode::HINS_and_b:
+  case Opcode::HINS_and_w:
+  case Opcode::HINS_and_l:
+  case Opcode::HINS_and_q:
+    HANDLE_BINOP( &, Opcode::HINS_and_b );
+    break;
+
+  case Opcode::HINS_or_b:
+  case Opcode::HINS_or_w:
+  case Opcode::HINS_or_l:
+  case Opcode::HINS_or_q:
+    HANDLE_BINOP( |, Opcode::HINS_or_b );
+    break;
+
+  case Opcode::HINS_xor_b:
+  case Opcode::HINS_xor_w:
+  case Opcode::HINS_xor_l:
+  case Opcode::HINS_xor_q:
+    HANDLE_BINOP( ^, Opcode::HINS_xor_b );
+    break;
+
   case Opcode::HINS_jmp:
     next = ins.at(0).get_target_offset();
     break;
