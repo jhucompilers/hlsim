@@ -1,0 +1,14 @@
+  .section .text
+
+  .globl main
+main:
+  enter $0
+
+  call read_i32
+  compl_l vr10, vr0
+  mov_l vr1, vr10
+  call print_i32
+  call print_nl
+
+  leave $0
+  ret

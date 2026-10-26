@@ -322,12 +322,14 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
     HANDLE_UNOP(val = (val == 0), Opcode::HINS_not_b);
     break;
 
-  /*
   case Opcode::HINS_compl_b:
   case Opcode::HINS_compl_w:
   case Opcode::HINS_compl_l:
   case Opcode::HINS_compl_q:
+    HANDLE_UNOP(val = ~val, Opcode::HINS_compl_b);
+    break;
 
+  /*
   case Opcode::HINS_inc_b:
   case Opcode::HINS_inc_w:
   case Opcode::HINS_inc_l:
