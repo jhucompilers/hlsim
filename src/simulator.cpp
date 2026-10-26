@@ -89,6 +89,15 @@ uint64_t Simulator::execute() {
 
 #define HANDLE_BINOP(op, base_opcode) HANDLE_BINOP_CHECKRIGHT(op, base_opcode, (void) right)
 
+#define HANDLE_UNOP(xform, base_opcode) \
+    do { \
+      unsigned operand_size = get_operand_size( ins.get_opcode(), base_opcode ); \
+      Frame *cur_frame = m_stack.get_top(); \
+      uint64_t val = load_source( cur_frame, ins.at(1), operand_size, ins.get_loc() ); \
+      xform; \
+      store_dest( cur_frame, ins.at(0), operand_size, val, ins.get_loc() ); \
+    } while ( 0 )
+
 unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
   unsigned next = pc + 1;
 
@@ -303,22 +312,17 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
   case Opcode::HINS_neg_w:
   case Opcode::HINS_neg_l:
   case Opcode::HINS_neg_q:
-    {
-      unsigned operand_size = get_operand_size( ins.get_opcode(), Opcode::HINS_neg_b );
-      Frame *cur_frame = m_stack.get_top();
-      uint64_t val = load_source( cur_frame, ins.at(1), operand_size, ins.get_loc() );
-      // Two's complement negation
-      val = ~val;
-      ++val;
-      store_dest( cur_frame, ins.at(0), operand_size, val, ins.get_loc() );
-    }
+    HANDLE_UNOP(val = ~val + 1, Opcode::HINS_neg_b);
     break;
 
-  /*
   case Opcode::HINS_not_b:
   case Opcode::HINS_not_w:
   case Opcode::HINS_not_l:
   case Opcode::HINS_not_q:
+    HANDLE_UNOP(val = (val == 0), Opcode::HINS_not_b);
+    break;
+
+  /*
   case Opcode::HINS_compl_b:
   case Opcode::HINS_compl_w:
   case Opcode::HINS_compl_l:
