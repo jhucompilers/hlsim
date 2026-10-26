@@ -146,6 +146,9 @@ enum class Opcode {
   HINS_print_str,
   HINS_print_nl,
   HINS_print_i32,
+  HINS_read_i64,
+  HINS_print_i64,
+  HINS_print_space,
 };
 
 Opcode opcode_from_s( const std::string &s );

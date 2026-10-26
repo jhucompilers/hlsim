@@ -29,6 +29,9 @@ const std::unordered_map<Opcode, std::vector<OperandKind>> s_instruction_formats
   { Opcode::HINS_print_str, {} },
   { Opcode::HINS_print_nl, {} },
   { Opcode::HINS_print_i32, {} },
+  { Opcode::HINS_read_i64, {} },
+  { Opcode::HINS_print_i64, {} },
+  { Opcode::HINS_print_space, {} },
 };
 
 }
@@ -114,28 +117,24 @@ void Program::validate() const {
       validate_instruction( **i, *j );
 }
 
+#define ADD_INTRINSIC(name) \
+  do { \
+    std::shared_ptr<Function> name = std::make_shared<Function>( #name ); \
+    add_function( name, loc );  \
+    name->add_instruction( Instruction( Opcode::HINS_##name, loc++ ) ); \
+    name->add_instruction( Instruction( Opcode::HINS_ret, loc++ ) ); \
+  } while (0)
+
 void Program::add_intrinsics() {
   Location loc( "<intrinsics>", 1, 1 );
 
-  std::shared_ptr<Function> read_i32 = std::make_shared<Function>( "read_i32" );
-  add_function( read_i32, loc ); 
-  read_i32->add_instruction( Instruction( Opcode::HINS_read_i32, loc++ ) );
-  read_i32->add_instruction( Instruction( Opcode::HINS_ret, loc++ ) );
-
-  std::shared_ptr<Function> print_str = std::make_shared<Function>( "print_str" );
-  add_function( print_str, loc );
-  print_str->add_instruction( Instruction( Opcode::HINS_print_str, loc++ ) );
-  print_str->add_instruction( Instruction( Opcode::HINS_ret, loc++ ) );
-
-  std::shared_ptr<Function> print_nl = std::make_shared<Function>( "print_nl" );
-  add_function( print_nl, loc );
-  print_nl->add_instruction( Instruction( Opcode::HINS_print_nl, loc++ ) );
-  print_nl->add_instruction( Instruction( Opcode::HINS_ret, loc++ ) );
-
-  std::shared_ptr<Function> print_i32 = std::make_shared<Function>( "print_i32" );
-  add_function( print_i32, loc );
-  print_i32->add_instruction( Instruction( Opcode::HINS_print_i32, loc++ ) );
-  print_i32->add_instruction( Instruction( Opcode::HINS_ret, loc++ ) );
+  ADD_INTRINSIC( read_i32 );
+  ADD_INTRINSIC( print_i32 );
+  ADD_INTRINSIC( read_i64 );
+  ADD_INTRINSIC( print_i64 );
+  ADD_INTRINSIC( print_str );
+  ADD_INTRINSIC( print_nl );
+  ADD_INTRINSIC( print_space );
 }
 
 void Program::validate_instruction( const Function &fn, Instruction &ins ) const {
