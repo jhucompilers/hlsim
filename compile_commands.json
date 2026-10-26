@@ -134,5 +134,73 @@
     "directory": "/space/daveho/git/hlsim",
     "file": "/space/daveho/git/hlsim/src/exceptions.cpp",
     "output": "/space/daveho/git/hlsim/build/exceptions.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-std=c++20",
+      "-Iinclude",
+      "-Igensrc",
+      "-c",
+      "-o",
+      "build/program.o",
+      "src/program.cpp"
+    ],
+    "directory": "/space/daveho/git/hlsim",
+    "file": "/space/daveho/git/hlsim/src/program.cpp",
+    "output": "/space/daveho/git/hlsim/build/program.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-std=c++20",
+      "-Iinclude",
+      "-Igensrc",
+      "-c",
+      "-o",
+      "build/function.o",
+      "src/function.cpp"
+    ],
+    "directory": "/space/daveho/git/hlsim",
+    "file": "/space/daveho/git/hlsim/src/function.cpp",
+    "output": "/space/daveho/git/hlsim/build/function.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-std=c++20",
+      "-Iinclude",
+      "-Igensrc",
+      "-c",
+      "-o",
+      "build/simulator.o",
+      "src/simulator.cpp"
+    ],
+    "directory": "/space/daveho/git/hlsim",
+    "file": "/space/daveho/git/hlsim/src/simulator.cpp",
+    "output": "/space/daveho/git/hlsim/build/simulator.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-g",
+      "-Wall",
+      "-std=c++20",
+      "-Iinclude",
+      "-Igensrc",
+      "-c",
+      "-o",
+      "build/stack.o",
+      "src/stack.cpp"
+    ],
+    "directory": "/space/daveho/git/hlsim",
+    "file": "/space/daveho/git/hlsim/src/stack.cpp",
+    "output": "/space/daveho/git/hlsim/build/stack.o"
   }
 ]
