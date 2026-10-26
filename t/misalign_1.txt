@@ -1,0 +1,28 @@
+  .section .text
+
+  .globl inner
+inner:
+  mov_q vr10, vr1     /* save pointer in vr10 */
+  mov_q (vr10), $42
+  mov_q vr1, (vr10)
+  call print_i32
+  call print_nl
+  ret
+
+  .globl outer
+outer:
+  mov_q vr10, vr1
+  mov_q vr1, vr10
+  call inner
+  ret
+
+  .globl main
+main:
+  enter $16
+
+  localaddr vr10, $4
+  mov_q vr1, vr10
+  call outer
+
+  leave $16
+  ret

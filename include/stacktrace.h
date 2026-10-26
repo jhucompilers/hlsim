@@ -18,6 +18,7 @@
 #define STACKTRACE_H
 
 #include <vector>
+#include <iostream>
 #include "location.h"
 
 class StackTrace {
@@ -43,6 +44,8 @@ public:
 
   const_iterator begin() const;
   const_iterator end() const;
+
+  void print( std::ostream &out ) const;
 };
 
 #endif // STACKTRACE_H

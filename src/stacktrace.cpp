@@ -15,6 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "stacktrace.h"
+#include <string>
 
 StackTrace::StackTrace() {
 
@@ -50,4 +51,14 @@ StackTrace::const_iterator StackTrace::begin() const {
 
 StackTrace::const_iterator StackTrace::end() const {
   return m_items.end();
+}
+
+void StackTrace::print( std::ostream &out ) const {
+  for ( auto i = begin(); i != end(); ++i ) {
+    const Location &loc = *i;
+    out << "    ";
+    if ( loc.has_fn_name() )
+      out << "in " << loc.get_fn_name() << " ";
+    out << "(" << loc.get_filename() << ":" << loc.get_line() << ")\n";
+  }
 }

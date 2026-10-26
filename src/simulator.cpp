@@ -57,6 +57,11 @@ int64_t sign_extend( uint64_t val, unsigned operand_size ) {
   }
 }
 
+// Keep a thread local pointer to the simulator
+// to make it easy for code anywhere in the program
+// to throw a SimError with a dynamic stack trace.
+thread_local Simulator *s_sim;
+
 };
 
 Simulator::Simulator( const Program &program )
@@ -65,6 +70,11 @@ Simulator::Simulator( const Program &program )
   // Initialize global vregs
   for ( int i = 0; i < 10; ++i )
     m_global_vregs[i] = uint64_t(0) - 1U;
+
+  // Make sure there isn't another Simulator object in this thread
+  if ( s_sim != nullptr )
+    throw std::runtime_error( "multiple Simulator objects in same thread" );
+  s_sim = this;
 }
 
 Simulator::~Simulator() {
@@ -81,7 +91,8 @@ uint64_t Simulator::execute() {
 
   while ( !m_done ) {
     if ( pc >= m_cur_fn->get_num_instructions() )
-      throw SimError( "pc is past end of instructions in function " + m_cur_fn->get_name(), m_cur_fn->get_end_loc() );
+      raise_simerr( "pc is past end of instructions in function " + m_cur_fn->get_name(), m_cur_fn->get_end_loc() );
+
     const Instruction &ins = m_cur_fn->at( pc );
     pc = execute_ins( ins, pc );
   }
@@ -89,6 +100,17 @@ uint64_t Simulator::execute() {
   // Whatever is in vr0 when main returns is the result
   // of the program
   return m_global_vregs[0];
+}
+
+void Simulator::raise_simerr( const std::string &msg, const Location &loc ) {
+  StackTrace stacktrace;
+  assert( s_sim != nullptr );
+  s_sim->create_stacktrace( stacktrace, loc );
+  throw SimError( msg, stacktrace );
+}
+
+void Simulator::raise_simerr( const std::string &msg, const Instruction &ins ) {
+  raise_simerr( msg, ins.get_loc() );
 }
 
 #define HANDLE_BINOP_CHECKRIGHT(op, base_opcode, checkright) \
@@ -240,14 +262,14 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
   case Opcode::HINS_div_w:
   case Opcode::HINS_div_l:
   case Opcode::HINS_div_q:
-    HANDLE_BINOP_CHECKRIGHT( /, Opcode::HINS_div_b, if ( right == 0 ) throw SimError( "division by 0", ins.get_loc() ) );
+    HANDLE_BINOP_CHECKRIGHT( /, Opcode::HINS_div_b, if ( right == 0 ) raise_simerr( "division by 0", ins.get_loc() ) );
     break;
 
   case Opcode::HINS_mod_b:
   case Opcode::HINS_mod_w:
   case Opcode::HINS_mod_l:
   case Opcode::HINS_mod_q:
-    HANDLE_BINOP_CHECKRIGHT( %, Opcode::HINS_mod_b, if ( right == 0 ) throw SimError( "mod by 0", ins.get_loc() ) );
+    HANDLE_BINOP_CHECKRIGHT( %, Opcode::HINS_mod_b, if ( right == 0 ) raise_simerr( "mod by 0", ins.get_loc() ) );
     break;
 
   case Opcode::HINS_lshift_b:
@@ -476,7 +498,7 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
     break;
 
   default:
-    throw SimError( "instruction not simulated yet", ins.get_loc() );
+    raise_simerr( "instruction not simulated yet", ins.get_loc() );
   }
 
   return next;
@@ -680,13 +702,13 @@ void Simulator::write_mem( uint64_t addr, unsigned operand_size, uint64_t val, c
 Frame *Simulator::determine_frame( uint64_t addr, const char *op, const Location &loc ) {
   uint64_t frame_num = ( addr >> Block::ADDR_RANGE_SHIFT );
   if ( frame_num == 0U )
-    throw SimError( std::string( op ) + " of invalid address " + Stack::to_hex( addr ) + " (null pointer deref?)", loc );
+    raise_simerr( std::string( op ) + " of invalid address " + Stack::to_hex( addr ) + " (null pointer deref?)", loc );
    // frame number "1" corresponds to the stack frame for the
    // main function (frame number 0 is not used)
   --frame_num;
 
   if ( frame_num >= m_stack.get_num_frames() )
-    throw SimError( std::string( op ) + " of invalid address " + Stack::to_hex( addr ), loc );
+    raise_simerr( std::string( op ) + " of invalid address " + Stack::to_hex( addr ), loc );
 
   return m_stack.get_frame( frame_num );
 }
@@ -707,20 +729,21 @@ uint64_t Simulator::trim( uint64_t val, unsigned operand_size ) const {
   }
 }
 
-void Simulator::create_stacktrace( StackTrace &stacktrace, const Instruction &ins ) const {
-  const Instruction *cur_ins = &ins;
+void Simulator::create_stacktrace( StackTrace &stacktrace, const Location &loc ) const {
+  //const Instruction *cur_ins = &ins;
   int frame_num = int(m_stack.get_num_frames()) - 1;
   assert( frame_num >= 0 );
 
   const Frame *cur_frame = m_stack.get_frame( unsigned( frame_num ) );
   const Function *cur_fn = cur_frame->get_callee();
+  const Location *cur_loc = &loc;
 
   for (;;) {
-    const Location &loc = cur_ins->get_loc();
-    std::string filename = loc.get_filename() + " (" + cur_fn->get_name() + ")";
-    int line = loc.get_line();
-    int col = loc.get_col();
-    stacktrace.append_loc( Location( filename, line, col ) );
+    const std::string filename = cur_loc->get_filename();
+    int line = cur_loc->get_line();
+    int col = cur_loc->get_col();
+    const std::string &fn_name = cur_fn->get_name();
+    stacktrace.append_loc( Location( filename, line, col, fn_name ) );
 
     if ( frame_num == 0 )
       break;
@@ -730,6 +753,7 @@ void Simulator::create_stacktrace( StackTrace &stacktrace, const Instruction &in
     --frame_num;
     cur_frame = m_stack.get_frame( unsigned( frame_num ) );
     cur_fn = cur_frame->get_callee();
-    cur_ins = &cur_fn->at( ret_ins_offset );
+    const Instruction &ins = cur_fn->at( ret_ins_offset );
+    cur_loc = &ins.get_loc();
   }
 }

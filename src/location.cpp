@@ -23,17 +23,19 @@ Location::Location()
 
 }
 
-Location::Location( const std::string &filename, int line, int col )
+Location::Location( const std::string &filename, int line, int col, const std::string &fn_name )
   : m_filename( filename )
   , m_line( line )
-  , m_col( col ) {
+  , m_col( col )
+  , m_fn_name( fn_name ) {
 
 }
 
 Location::Location( const Location &other )
   : m_filename( other.m_filename )
   , m_line( other.m_line )
-  , m_col( other.m_col ) {
+  , m_col( other.m_col )
+  , m_fn_name( other.m_fn_name ) {
 
 }
 
@@ -46,6 +48,7 @@ Location &Location::operator=( const Location &rhs ) {
     m_filename = rhs.m_filename;
     m_line = rhs.m_line;
     m_col = rhs.m_col;
+    m_fn_name = rhs.m_fn_name;
   }
   return *this;
 }
@@ -64,6 +67,15 @@ int Location::get_line() const {
 
 int Location::get_col() const {
   return m_col;
+}
+
+bool Location::has_fn_name() const {
+  return !m_fn_name.empty();
+}
+
+const std::string &Location::get_fn_name() const {
+  assert( has_fn_name() );
+  return m_fn_name;
 }
 
 void Location::advance( int c ) {

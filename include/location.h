@@ -23,10 +23,11 @@ class Location {
 private:
   std::string m_filename;
   int m_line, m_col;
+  std::string m_fn_name;
 
 public:
   Location();
-  Location( const std::string &filename, int line, int col );
+  Location( const std::string &filename, int line, int col, const std::string &fn_name = "" );
   Location( const Location &other );
   ~Location();
 
@@ -36,6 +37,9 @@ public:
   const std::string &get_filename() const;
   int get_line() const;
   int get_col() const;
+
+  bool has_fn_name() const;
+  const std::string &get_fn_name() const;
 
   void advance( int c );
   void unadvance( int c );

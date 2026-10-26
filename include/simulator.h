@@ -43,6 +43,14 @@ public:
 
   uint64_t execute();
 
+  // Raise a SimError with a stack trace, with specified Location
+  // being the innermost location.
+  [[noreturn]] static void raise_simerr( const std::string &msg, const Location &loc );
+
+  // Raise a SimError with a stack trace, with specified Instruction
+  // being the innermost location.
+  [[noreturn]] static void raise_simerr( const std::string &msg, const Instruction &ins );
+
 private:
   // Kinds of comparisons
   enum class Compare { LT, LTE, GT, GTE, EQ, NEQ };
@@ -61,7 +69,9 @@ private:
   void write_mem( uint64_t addr, unsigned operand_size, uint64_t val, const Location &loc );
   Frame *determine_frame( uint64_t addr, const char *op, const Location &loc );
   uint64_t trim( uint64_t val, unsigned operand_size ) const;
-  void create_stacktrace( StackTrace &stacktrace, const Instruction &ins ) const;
+
+  // Create a StackTrace with given Location as the innermost Location.
+  void create_stacktrace( StackTrace &stacktrace, const Location &loc ) const;
 };
 
 #endif // SIMULATOR_H

@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <exception>
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
@@ -62,14 +63,24 @@ int execute( int argc, char **argv ) {
   return int( result );
 }
 
-void print_error_message( const std::string &msg, const Location &loc = Location() ) {
-  if ( loc.is_valid() )
-    std::cerr << loc.get_filename()
-              << ":"
-              << loc.get_line()
-              << ":" << loc.get_col()
-              << ": ";
-  std::cerr << "Error: " << msg << "\n";
+void print_error_message( const SimError &ex ) {
+  if ( ex.has_stacktrace() ) {
+    std::cerr << "Error: " << ex.what() << "\n";
+    ex.get_stacktrace().print( std::cerr );
+  } else {
+    const Location &loc = ex.get_loc();
+    if ( loc.is_valid() )
+      std::cerr << loc.get_filename()
+                << ":"
+                << loc.get_line()
+                << ":" << loc.get_col()
+                << ": ";
+    std::cerr << "Error: " << ex.what() << "\n";
+  }
+}
+
+void print_error_message( const std::exception &ex ) {
+  std::cerr << "Error: " << ex.what() << "\n";
 }
 
 int main( int argc, char **argv ) {
@@ -81,10 +92,10 @@ int main( int argc, char **argv ) {
   try {
     return execute( argc, argv );
   } catch ( SimError &ex ) {
-    print_error_message( ex.what(), ex.get_loc() );
+    print_error_message( ex );
     return 127;
   } catch ( std::exception &ex ) {
-    print_error_message( ex.what() );
+    print_error_message( ex );
     return 127;
   }
 }

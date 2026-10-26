@@ -19,9 +19,9 @@
 #include <sstream>
 #include <cassert>
 #include <cstring>
-#include "exceptions.h"
 #include "function.h"
 #include "stack.h"
+#include "simulator.h"
 
 namespace {
 
@@ -122,8 +122,8 @@ uint64_t Block::bounds_and_alignment_check( const char *op, uint64_t addr, uint6
   std::string msg;
   msg += "Invalid ";
   msg += op;
-  msg += " addr=";
-  msg += to_hex_s( offset + size );
+  msg += " offset=";
+  msg += to_hex_s( offset );
   msg += ", size=";
   msg += std::to_string( size );
   msg += " (";
@@ -135,7 +135,7 @@ uint64_t Block::bounds_and_alignment_check( const char *op, uint64_t addr, uint6
     msg += "misaligned";
   }
   msg += ")";
-  throw SimError( msg, loc );
+  Simulator::raise_simerr( msg, loc );
 }
 
 // Frame class: simulates a stack frame
@@ -173,22 +173,22 @@ unsigned Frame::get_ret_ins_offset() const {
 
 void Frame::enter( uint64_t nbytes, const Location &loc ) {
   if ( m_block.get() != nullptr )
-    throw SimError( "multiple enter instructions in one function?", loc );
+    Simulator::raise_simerr( "multiple enter instructions in one function?", loc );
   m_block = std::make_unique<Block>( m_base, nbytes );
 }
 
 void Frame::leave( uint64_t nbytes, const Location &loc ) {
   if ( !m_block.get() )
-    throw SimError( "leave instruction without enter instruction", loc );
+    Simulator::raise_simerr( "leave instruction without enter instruction", loc );
   if ( m_block->get_size() != nbytes )
-    throw SimError( "leave instruction size mismatch with enter", loc );
+    Simulator::raise_simerr( "leave instruction size mismatch with enter", loc );
   m_block.reset( nullptr );
 }
 
 Block *Frame::get_block( const Location &loc ) {
   Block *p = m_block.get();
   if ( !p )
-    throw SimError( "memory operation in stack frame with no memory block", loc );
+    Simulator::raise_simerr( "memory operation in stack frame with no memory block", loc );
   return p;
 }
 
