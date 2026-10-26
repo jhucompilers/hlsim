@@ -8,5 +8,8 @@ You can see some of these example programs here:
 
 <https://github.com/jhucompilers/fall2025-tests/tree/main/assign04/example_highlevel_code>
 
-This is a work in progress. Right now it implements only a small
-subset of the instructions in the high-level IR.
+This is a work in progress. As of right now (Monday, Oct 26th, 2026)
+it is fairly complete, and successfully executes most of the
+test programs in the test repository. However, it's very possible
+that there are bugs. Please [let me know](mailto:daveho@cs.jhu.edu)
+if you run into any issues with the simulator.
