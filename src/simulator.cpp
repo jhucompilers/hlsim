@@ -448,7 +448,7 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
         Frame *frame = determine_frame( str_ptr, "read", ins.get_loc() );
         Block *block = frame->get_block( ins.get_loc() );
 
-        // Get the characters of the string on character at a time
+        // Get the characters of the string one character at a time
         std::string str_value;
         for (;;) {
           uint8_t c = block->loadb( str_ptr, ins.get_loc() );
@@ -730,7 +730,6 @@ uint64_t Simulator::trim( uint64_t val, unsigned operand_size ) const {
 }
 
 void Simulator::create_stacktrace( StackTrace &stacktrace, const Location &loc ) const {
-  //const Instruction *cur_ins = &ins;
   int frame_num = int(m_stack.get_num_frames()) - 1;
   assert( frame_num >= 0 );
 
