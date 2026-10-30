@@ -23,10 +23,12 @@
 #include <unordered_map>
 #include <string>
 #include "stack.h"
+#include "stacktrace.h"
 
 class Function;
 class Location;
 class Instruction;
+class ThrowSimErrorWithStackTrace;
 
 class Program {
 public:
@@ -56,7 +58,7 @@ public:
   unsigned get_str_pool_size() const;
 
   // Get a pointer to the string literal referred-to by given runtime address
-  const char *get_str_lit_ptr( uint64_t addr, const Location &loc ) const;
+  const char *get_str_lit_ptr( uint64_t addr, const Location &loc, ThrowSimErrorWithStackTrace *t ) const;
 
   // Create the string pool and determine addresses of
   // string literals

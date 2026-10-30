@@ -20,6 +20,7 @@
 #include <vector>
 #include <iostream>
 #include "location.h"
+class Instruction;
 
 class StackTrace {
 private:
@@ -46,6 +47,28 @@ public:
   const_iterator end() const;
 
   void print( std::ostream &out ) const;
+};
+
+// Simulator will implement this interface to allow
+// other code (e.g., Block) to throw a SimError with
+// the current stack trace.
+class ThrowSimErrorWithStackTrace {
+private:
+  // no value semantics
+  ThrowSimErrorWithStackTrace( const ThrowSimErrorWithStackTrace & ) = delete;
+  ThrowSimErrorWithStackTrace &operator=( const ThrowSimErrorWithStackTrace & ) = delete;
+
+public:
+  ThrowSimErrorWithStackTrace();
+  virtual ~ThrowSimErrorWithStackTrace();
+
+  // Raise a SimError with a stack trace, with specified Location
+  // being the innermost location.
+  virtual void raise_simerr( const std::string &msg, const Location &loc ) const __attribute__((noreturn)) = 0;
+
+  // Raise a SimError with a stack trace, with specified Instruction
+  // being the innermost location.
+  virtual void raise_simerr( const std::string &msg, const Instruction &ins ) const __attribute__((noreturn)) = 0;
 };
 
 #endif // STACKTRACE_H

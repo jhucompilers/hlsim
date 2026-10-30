@@ -24,6 +24,7 @@
 #include "instruction.h"
 #include "exceptions.h"
 #include "stack.h"
+#include "stacktrace.h"
 #include "program.h"
 
 namespace {
@@ -87,12 +88,12 @@ unsigned Program::get_str_pool_size() const {
   return m_str_pool_size;
 }
 
-const char *Program::get_str_lit_ptr( uint64_t addr, const Location &loc ) const {
+const char *Program::get_str_lit_ptr( uint64_t addr, const Location &loc, ThrowSimErrorWithStackTrace *t ) const {
   // Make sure the address is in the valid address range
   // for string literals in the string pool
   uint64_t str_addr_base = Program::STR_POOL_BASE;
   if ( addr < str_addr_base || addr >= ( str_addr_base + m_str_pool_size ) )
-    throw SimError( "Invalid string literal address " + Stack::to_hex( addr ), loc );
+    t->raise_simerr( "Invalid string literal address " + Stack::to_hex( addr ), loc );
 
   uint64_t offset = addr - str_addr_base;
   assert( offset < m_str_pool_size );

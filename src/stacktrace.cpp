@@ -62,3 +62,11 @@ void StackTrace::print( std::ostream &out ) const {
     out << "(" << loc.get_filename() << ":" << loc.get_line() << ")\n";
   }
 }
+
+ThrowSimErrorWithStackTrace::ThrowSimErrorWithStackTrace() {
+
+}
+
+ThrowSimErrorWithStackTrace::~ThrowSimErrorWithStackTrace() {
+
+}

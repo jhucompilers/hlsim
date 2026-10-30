@@ -57,11 +57,6 @@ int64_t sign_extend( uint64_t val, unsigned operand_size ) {
   }
 }
 
-// Keep a thread local pointer to the simulator
-// to make it easy for code anywhere in the program
-// to throw a SimError with a dynamic stack trace.
-thread_local Simulator *s_sim;
-
 };
 
 Simulator::Simulator( const Program &program )
@@ -70,11 +65,6 @@ Simulator::Simulator( const Program &program )
   // Initialize global vregs
   for ( int i = 0; i < 10; ++i )
     m_global_vregs[i] = uint64_t(0) - 1U;
-
-  // Make sure there isn't another Simulator object in this thread
-  if ( s_sim != nullptr )
-    throw std::runtime_error( "multiple Simulator objects in same thread" );
-  s_sim = this;
 }
 
 Simulator::~Simulator() {
@@ -102,15 +92,14 @@ uint64_t Simulator::execute() {
   return m_global_vregs[0];
 }
 
-void Simulator::raise_simerr( const std::string &msg, const Location &loc ) {
+void Simulator::raise_simerr( const std::string &msg, const Location &loc ) const {
   StackTrace stacktrace;
-  assert( s_sim != nullptr );
-  s_sim->create_stacktrace( stacktrace, loc );
+  create_stacktrace( stacktrace, loc );
   throw SimError( msg, stacktrace );
 }
 
-void Simulator::raise_simerr( const std::string &msg, const Instruction &ins ) {
-  raise_simerr( msg, ins.get_loc() );
+void Simulator::raise_simerr( const std::string &msg, const Instruction &ins ) const {
+  Simulator::raise_simerr( msg, ins.get_loc() );
 }
 
 #define HANDLE_BINOP_CHECKRIGHT(op, base_opcode, checkright) \
@@ -145,11 +134,11 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
     break;
 
   case Opcode::HINS_enter:
-    m_stack.get_top()->enter( ins.at(0).get_imm(), ins.get_loc() );
+    m_stack.get_top()->enter( ins.at(0).get_imm(), ins.get_loc(), this );
     break;
 
   case Opcode::HINS_leave:
-    m_stack.get_top()->leave( ins.at(0).get_imm(), ins.get_loc() );
+    m_stack.get_top()->leave( ins.at(0).get_imm(), ins.get_loc(), this );
     break;
 
   case Opcode::HINS_call:
@@ -441,17 +430,17 @@ unsigned Simulator::execute_ins( const Instruction &ins, unsigned pc ) {
 
       if ( str_ptr >= Program::STR_POOL_BASE && str_ptr < Block::ADDR_RANGE ) {
         // The pointer points to a location in the string pool
-        const char *s = m_program.get_str_lit_ptr( str_ptr, ins.get_loc() );
+        const char *s = m_program.get_str_lit_ptr( str_ptr, ins.get_loc(), this );
         std::cout << s;
       } else {
         // See which stack frame the pointer falls in (if any)
         Frame *frame = determine_frame( str_ptr, "read", ins.get_loc() );
-        Block *block = frame->get_block( ins.get_loc() );
+        Block *block = frame->get_block( ins.get_loc(), this );
 
         // Get the characters of the string one character at a time
         std::string str_value;
         for (;;) {
-          uint8_t c = block->loadb( str_ptr, ins.get_loc() );
+          uint8_t c = block->loadb( str_ptr, ins.get_loc(), this );
           if ( c == 0 )
             break;
           str_value += char(c);
@@ -653,20 +642,20 @@ void Simulator::write_vreg( Frame *frame, int vreg_num, uint64_t val ) {
 
 uint64_t Simulator::read_mem( uint64_t addr, unsigned operand_size, const Location &loc ) {
   Frame *frame = determine_frame( addr, "read", loc );
-  Block *block = frame->get_block( loc );
+  Block *block = frame->get_block( loc, this );
   uint64_t val;
   switch ( operand_size ) {
   case 1:
-    val = block->loadb( addr, loc );
+    val = block->loadb( addr, loc, this );
     break;
   case 2:
-    val = block->loadw( addr, loc );
+    val = block->loadw( addr, loc, this );
     break;
   case 4:
-    val = block->loadl( addr, loc );
+    val = block->loadl( addr, loc, this );
     break;
   case 8:
-    val = block->loadq( addr, loc );
+    val = block->loadq( addr, loc, this );
     break;
   default:
     assert( false );
@@ -678,19 +667,19 @@ uint64_t Simulator::read_mem( uint64_t addr, unsigned operand_size, const Locati
 
 void Simulator::write_mem( uint64_t addr, unsigned operand_size, uint64_t val, const Location &loc ) {
   Frame *frame = determine_frame( addr, "write", loc );
-  Block *block = frame->get_block( loc );
+  Block *block = frame->get_block( loc, this );
   switch ( operand_size ) {
   case 1:
-    block->storeb( addr, uint8_t( val ), loc );
+    block->storeb( addr, uint8_t( val ), loc, this );
     break;
   case 2:
-    block->storew( addr, uint16_t( val ), loc );
+    block->storew( addr, uint16_t( val ), loc, this );
     break;
   case 4:
-    block->storel( addr, uint32_t( val ), loc );
+    block->storel( addr, uint32_t( val ), loc, this );
     break;
   case 8:
-    block->storeq( addr, uint64_t( val ), loc );
+    block->storeq( addr, uint64_t( val ), loc, this );
     break;
   default:
     assert( false );

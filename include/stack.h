@@ -17,11 +17,13 @@
 #ifndef STACK_H
 #define STACK_H
 
+#include "stacktrace.h"
 #include <cstdint>
 #include <memory>
 #include <vector>
 class Location;
 class Function;
+class ThrowSimErrorWithStackTrace;
 
 // A block of memory allocated for storage of memory variables
 // in a stack frame.
@@ -52,18 +54,18 @@ public:
   uint64_t get_base() const;
   uint64_t get_size() const;
 
-  void storeb( uint64_t addr, uint8_t val, const Location &loc );
-  void storew( uint64_t addr, uint16_t val, const Location &loc );
-  void storel( uint64_t addr, uint32_t val, const Location &loc );
-  void storeq( uint64_t addr, uint64_t val, const Location &loc );
+  void storeb( uint64_t addr, uint8_t val, const Location &loc, ThrowSimErrorWithStackTrace *t );
+  void storew( uint64_t addr, uint16_t val, const Location &loc, ThrowSimErrorWithStackTrace *t );
+  void storel( uint64_t addr, uint32_t val, const Location &loc, ThrowSimErrorWithStackTrace *t );
+  void storeq( uint64_t addr, uint64_t val, const Location &loc, ThrowSimErrorWithStackTrace *t );
 
-  uint8_t loadb( uint64_t addr, const Location &loc );
-  uint16_t loadw( uint64_t addr, const Location &loc );
-  uint32_t loadl( uint64_t addr, const Location &loc );
-  uint64_t loadq( uint64_t addr, const Location &loc );
+  uint8_t loadb( uint64_t addr, const Location &loc, ThrowSimErrorWithStackTrace *t );
+  uint16_t loadw( uint64_t addr, const Location &loc, ThrowSimErrorWithStackTrace *t );
+  uint32_t loadl( uint64_t addr, const Location &loc, ThrowSimErrorWithStackTrace *t );
+  uint64_t loadq( uint64_t addr, const Location &loc, ThrowSimErrorWithStackTrace *t );
 
 private:
-  uint64_t bounds_and_alignment_check( const char *op, uint64_t addr, uint64_t size, const Location &loc );
+  uint64_t bounds_and_alignment_check( const char *op, uint64_t addr, uint64_t size, const Location &loc, ThrowSimErrorWithStackTrace *t );
 };
 
 // A stack frame.
@@ -89,10 +91,10 @@ public:
   const Function *get_callee() const;
   unsigned get_ret_ins_offset() const;
 
-  void enter( uint64_t nbytes, const Location &loc );
-  void leave( uint64_t nbytes, const Location &loc );
+  void enter( uint64_t nbytes, const Location &loc, ThrowSimErrorWithStackTrace *t );
+  void leave( uint64_t nbytes, const Location &loc, ThrowSimErrorWithStackTrace *t );
 
-  Block *get_block( const Location &loc );
+  Block *get_block( const Location &loc, ThrowSimErrorWithStackTrace *t );
 
   void store_local_vreg( int vreg_num, uint64_t val );
   uint64_t load_local_vreg( int vreg_num );

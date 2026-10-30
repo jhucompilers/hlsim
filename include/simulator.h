@@ -25,7 +25,7 @@ class Instruction;
 class Operand;
 class Function;
 
-class Simulator {
+class Simulator : public ThrowSimErrorWithStackTrace {
 private:
   const Program &m_program;
   Stack m_stack;
@@ -39,17 +39,17 @@ private:
 
 public:
   Simulator( const Program &program );
-  ~Simulator();
+  virtual ~Simulator();
 
   uint64_t execute();
 
   // Raise a SimError with a stack trace, with specified Location
   // being the innermost location.
-  [[noreturn]] static void raise_simerr( const std::string &msg, const Location &loc );
+  void raise_simerr( const std::string &msg, const Location &loc ) const __attribute__((noreturn));
 
   // Raise a SimError with a stack trace, with specified Instruction
   // being the innermost location.
-  [[noreturn]] static void raise_simerr( const std::string &msg, const Instruction &ins );
+  void raise_simerr( const std::string &msg, const Instruction &ins ) const __attribute__((noreturn));
 
 private:
   // Kinds of comparisons

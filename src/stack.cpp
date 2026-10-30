@@ -22,6 +22,7 @@
 #include "function.h"
 #include "stack.h"
 #include "simulator.h"
+#include "stacktrace.h"
 
 namespace {
 
@@ -55,55 +56,55 @@ uint64_t Block::get_size() const {
   return m_size;
 }
 
-void Block::storeb( uint64_t addr, uint8_t val, const Location &loc ) {
-  uint64_t offset = bounds_and_alignment_check( "store", addr, 1, loc );
+void Block::storeb( uint64_t addr, uint8_t val, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
+  uint64_t offset = bounds_and_alignment_check( "store", addr, 1, loc, t );
   uint8_t *p = reinterpret_cast<uint8_t*>( m_mem + offset );
   *p = val;
 }
 
-void Block::storew( uint64_t addr, uint16_t val, const Location &loc ) {
-  uint64_t offset = bounds_and_alignment_check( "store", addr, 2, loc );
+void Block::storew( uint64_t addr, uint16_t val, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
+  uint64_t offset = bounds_and_alignment_check( "store", addr, 2, loc, t );
   uint16_t *p = reinterpret_cast<uint16_t*>( m_mem + offset );
   *p = val;
 }
 
-void Block::storel( uint64_t addr, uint32_t val, const Location &loc ) {
-  uint64_t offset = bounds_and_alignment_check( "store", addr, 4, loc );
+void Block::storel( uint64_t addr, uint32_t val, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
+  uint64_t offset = bounds_and_alignment_check( "store", addr, 4, loc, t );
   uint32_t *p = reinterpret_cast<uint32_t*>( m_mem + offset );
   *p = val;
 }
 
-void Block::storeq( uint64_t addr, uint64_t val, const Location &loc ) {
-  uint64_t offset = bounds_and_alignment_check( "store", addr, 8, loc );
+void Block::storeq( uint64_t addr, uint64_t val, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
+  uint64_t offset = bounds_and_alignment_check( "store", addr, 8, loc, t );
   uint64_t *p = reinterpret_cast<uint64_t*>( m_mem + offset );
   *p = val;
 }
 
-uint8_t Block::loadb( uint64_t addr, const Location &loc ) {
-  uint64_t offset = bounds_and_alignment_check( "load", addr, 1, loc );
+uint8_t Block::loadb( uint64_t addr, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
+  uint64_t offset = bounds_and_alignment_check( "load", addr, 1, loc, t );
   uint8_t *p = reinterpret_cast<uint8_t*>( m_mem + offset );
   return *p;
 }
 
-uint16_t Block::loadw( uint64_t addr, const Location &loc ) {
-  uint64_t offset = bounds_and_alignment_check( "load", addr, 2, loc );
+uint16_t Block::loadw( uint64_t addr, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
+  uint64_t offset = bounds_and_alignment_check( "load", addr, 2, loc, t );
   uint16_t *p = reinterpret_cast<uint16_t*>( m_mem + offset );
   return *p;
 }
 
-uint32_t Block::loadl( uint64_t addr, const Location &loc ) {
-  uint64_t offset = bounds_and_alignment_check( "load", addr, 4, loc );
+uint32_t Block::loadl( uint64_t addr, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
+  uint64_t offset = bounds_and_alignment_check( "load", addr, 4, loc, t );
   uint32_t *p = reinterpret_cast<uint32_t*>( m_mem + offset );
   return *p;
 }
 
-uint64_t Block::loadq( uint64_t addr, const Location &loc ) {
-  uint64_t offset = bounds_and_alignment_check( "load", addr, 8, loc );
+uint64_t Block::loadq( uint64_t addr, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
+  uint64_t offset = bounds_and_alignment_check( "load", addr, 8, loc, t );
   uint64_t *p = reinterpret_cast<uint64_t*>( m_mem + offset );
   return *p;
 }
 
-uint64_t Block::bounds_and_alignment_check( const char *op, uint64_t addr, uint64_t size, const Location &loc ) {
+uint64_t Block::bounds_and_alignment_check( const char *op, uint64_t addr, uint64_t size, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
   // The simulator should only attempt a memory access if the address
   // is within the correct address range for the stack frame.
   assert( addr >= m_base );
@@ -135,7 +136,12 @@ uint64_t Block::bounds_and_alignment_check( const char *op, uint64_t addr, uint6
     msg += "misaligned";
   }
   msg += ")";
-  Simulator::raise_simerr( msg, loc );
+  t->raise_simerr( msg, loc );
+
+  // g++ 13 seems exceptionally stupid about being able to figure
+  // out that when a function with __attribute__ ((noreturn)) is
+  // called, it doesn't return
+  __builtin_unreachable();
 }
 
 // Frame class: simulates a stack frame
@@ -171,24 +177,24 @@ unsigned Frame::get_ret_ins_offset() const {
   return m_ret_ins_offset;
 }
 
-void Frame::enter( uint64_t nbytes, const Location &loc ) {
+void Frame::enter( uint64_t nbytes, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
   if ( m_block.get() != nullptr )
-    Simulator::raise_simerr( "multiple enter instructions in one function?", loc );
+    t->raise_simerr( "multiple enter instructions in one function?", loc );
   m_block = std::make_unique<Block>( m_base, nbytes );
 }
 
-void Frame::leave( uint64_t nbytes, const Location &loc ) {
+void Frame::leave( uint64_t nbytes, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
   if ( !m_block.get() )
-    Simulator::raise_simerr( "leave instruction without enter instruction", loc );
+    t->raise_simerr( "leave instruction without enter instruction", loc );
   if ( m_block->get_size() != nbytes )
-    Simulator::raise_simerr( "leave instruction size mismatch with enter", loc );
+    t->raise_simerr( "leave instruction size mismatch with enter", loc );
   m_block.reset( nullptr );
 }
 
-Block *Frame::get_block( const Location &loc ) {
+Block *Frame::get_block( const Location &loc, ThrowSimErrorWithStackTrace *t ) {
   Block *p = m_block.get();
   if ( !p )
-    Simulator::raise_simerr( "memory operation in stack frame with no memory block", loc );
+    t->raise_simerr( "memory operation in stack frame with no memory block", loc );
   return p;
 }
 
