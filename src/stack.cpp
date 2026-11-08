@@ -19,10 +19,16 @@
 #include <sstream>
 #include <cassert>
 #include <cstring>
+#include <bit>
 #include "function.h"
 #include "stack.h"
 #include "simulator.h"
 #include "stacktrace.h"
+
+static_assert(
+  std::endian::native == std::endian::little || std::endian::native == std::endian::big,
+  "not little or big endian?"
+);
 
 namespace {
 
@@ -58,26 +64,49 @@ uint64_t Block::get_size() const {
 
 void Block::storeb( uint64_t addr, uint8_t val, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
   uint64_t offset = bounds_and_alignment_check( "store", addr, 1, loc, t );
-  uint8_t *p = reinterpret_cast<uint8_t*>( m_mem + offset );
-  *p = val;
+  char *p = m_mem + offset;
+  *p = char( val );
 }
 
 void Block::storew( uint64_t addr, uint16_t val, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
   uint64_t offset = bounds_and_alignment_check( "store", addr, 2, loc, t );
-  uint16_t *p = reinterpret_cast<uint16_t*>( m_mem + offset );
-  *p = val;
+  char *p = m_mem + offset;
+  if constexpr ( std::endian::native == std::endian::little )
+    *reinterpret_cast<uint16_t*>( p ) = val;
+  else if constexpr ( std::endian::native == std::endian::big ) {
+    *p++ = char( val & 0xFF );
+    *p++ = char( val >> 8 );
+  }
 }
 
 void Block::storel( uint64_t addr, uint32_t val, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
   uint64_t offset = bounds_and_alignment_check( "store", addr, 4, loc, t );
-  uint32_t *p = reinterpret_cast<uint32_t*>( m_mem + offset );
-  *p = val;
+  char *p = m_mem + offset;
+  if constexpr ( std::endian::native == std::endian::little )
+    *reinterpret_cast<uint32_t*>( p )  = val;
+  else if constexpr ( std::endian::native == std::endian::big ) {
+    *p++ = char( val & 0xFF );
+    *p++ = char( ( val >> 8 ) & 0xFF );
+    *p++ = char( ( val >> 16 ) & 0xFF );
+    *p++ = char( val >> 24 );
+  }
 }
 
 void Block::storeq( uint64_t addr, uint64_t val, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
   uint64_t offset = bounds_and_alignment_check( "store", addr, 8, loc, t );
-  uint64_t *p = reinterpret_cast<uint64_t*>( m_mem + offset );
-  *p = val;
+  char *p = m_mem + offset;
+  if constexpr ( std::endian::native == std::endian::little )
+    *reinterpret_cast<uint64_t*>( p ) = val;
+  else if constexpr ( std::endian::native == std::endian::big ) {
+    *p++ = char( val & 0xFF );
+    *p++ = char( ( val >> 8 ) & 0xFF );
+    *p++ = char( ( val >> 16 ) & 0xFF );
+    *p++ = char( ( val >> 24 ) & 0xFF );
+    *p++ = char( ( val >> 32 ) & 0xFF );
+    *p++ = char( ( val >> 40 ) & 0xFF );
+    *p++ = char( ( val >> 48 ) & 0xFF );
+    *p++ = char( val >> 56 );
+  }
 }
 
 uint8_t Block::loadb( uint64_t addr, const Location &loc, ThrowSimErrorWithStackTrace *t ) {
