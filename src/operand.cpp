@@ -17,23 +17,26 @@
 #include <cassert>
 #include "operand.h"
 
-Operand::Operand( OperandKind kind, int64_t ival )
+Operand::Operand( OperandKind kind, int64_t ival, int32_t offset )
   : m_kind( kind )
-  , m_ival( ival ) {
+  , m_ival( ival )
+  , m_offset( offset ) {
   assert( kind != OperandKind::LABEL && kind != OperandKind::IMM_LABEL );
 }
 
 Operand::Operand( OperandKind kind, const std::string &label )
   : m_kind( kind )
   , m_ival( 0 )
-  , m_label( label ) {
+  , m_label( label )
+  , m_offset( 0 ) {
   assert( kind == OperandKind::LABEL || kind == OperandKind::IMM_LABEL );
 }
 
 Operand::Operand( const Operand &other )
   : m_kind( other.m_kind )
   , m_ival( other.m_ival )
-  , m_label( other.m_label ) {
+  , m_label( other.m_label )
+  , m_offset( other.m_offset ) {
 
 }
 
@@ -46,6 +49,7 @@ Operand &Operand::operator=( const Operand &rhs ) {
     m_kind = rhs.m_kind;
     m_ival = rhs.m_ival;
     m_label = rhs.m_label;
+    m_offset = rhs.m_offset;
   }
   return *this;
 }
@@ -55,7 +59,7 @@ OperandKind Operand::get_kind() const {
 }
 
 bool Operand::has_vreg() const {
-  return m_kind == OperandKind::VREG || m_kind == OperandKind::VREG_MEMREF;
+  return m_kind == OperandKind::VREG || m_kind == OperandKind::VREG_MEMREF || m_kind == OperandKind::VREG_MEMREF_OFFSET;
 }
 
 int Operand::get_vreg() const {
@@ -77,8 +81,12 @@ std::string Operand::get_label() const {
   return m_label;
 }
 
+int32_t Operand::get_offset() const {
+  return m_offset;
+}
+
 bool Operand::is_assignable() const {
-  return m_kind == OperandKind::VREG || m_kind == OperandKind::VREG_MEMREF;
+  return m_kind == OperandKind::VREG || m_kind == OperandKind::VREG_MEMREF || m_kind == OperandKind::VREG_MEMREF_OFFSET;
 }
 
 bool Operand::is_readable() const {

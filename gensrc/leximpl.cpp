@@ -75,12 +75,12 @@ uint8_t yylex_lookup_next_state(const uint8_t *table, int min_cc, int size, int 
 }
 
 static const uint8_t yylex_lookup_0[] = {
-  1, 255, 2, 255, 255, 255, 3, 4, 255, 255, 5, 255, 6, 255,
-  255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 7, 255, 255, 255, 255,
+  1, 255, 2, 255, 255, 255, 3, 4, 255, 255, 5, 6, 7, 255,
+  255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 9, 255, 255, 255, 255,
   255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
   255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
   255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-  255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 9,
+  255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 11,
 };
 
 static const int yylex_final_state_to_token_type[] = {
@@ -90,7 +90,9 @@ static const int yylex_final_state_to_token_type[] = {
   (int) TokenKind::LPAREN,
   (int) TokenKind::RPAREN,
   (int) TokenKind::COMMA,
+  -1,
   (int) TokenKind::IDENT,
+  (int) TokenKind::INT_LITERAL,
   (int) TokenKind::COLON,
   (int) TokenKind::IDENT,
   (int) TokenKind::IDENT,
@@ -116,6 +118,7 @@ static const int yylex_final_state_to_token_type[] = {
   (int) TokenKind::IDENT,
   (int) TokenKind::GLOBL,
   (int) TokenKind::GLOBL,
+  -1,
   (int) TokenKind::IMMEDIATE_LABEL,
   (int) TokenKind::IMMEDIATE,
   (int) TokenKind::IMMEDIATE_LABEL,
@@ -136,199 +139,215 @@ static int yylex(LEXER_TYPE lexer, LEXEME_BUF_TYPE lexeme_buf) {
     switch (state) {
     case 0:
       if (yylex_is_member(&yylex_cclass_0, c))
+        next_state = 10;
+      else if (isdigit(c))
         next_state = 8;
       else
         next_state = yylex_lookup_next_state(yylex_lookup_0, 34, 85, c);
       break;
     case 1:
       if (yylex_is_member(&yylex_cclass_1, c))
-        next_state = 35;
+        next_state = 38;
       else if (c == '"')
-        next_state = 36;
+        next_state = 39;
       else if (c == '\\')
-        next_state = 37;
+        next_state = 40;
       break;
     case 2:
       if (yylex_is_member(&yylex_cclass_2, c))
-        next_state = 32;
+        next_state = 35;
       else if (isdigit(c))
-        next_state = 33;
+        next_state = 36;
+      else if (c == '-')
+        next_state = 34;
       break;
     case 6:
+      if (isdigit(c))
+        next_state = 8;
+      break;
+    case 7:
       if (yylex_is_member(&yylex_cclass_3, c))
-        next_state = 10;
+        next_state = 12;
       else if (c == 'g')
-        next_state = 13;
+        next_state = 15;
       else if (c == 's')
-        next_state = 14;
+        next_state = 16;
       break;
     case 8:
-      if (yylex_is_member(&yylex_cclass_4, c))
-        next_state = 10;
-      break;
-    case 9:
-      if (yylex_is_member(&yylex_cclass_5, c))
-        next_state = 10;
-      else if (c == 'r')
-        next_state = 11;
+      if (isdigit(c))
+        next_state = 8;
       break;
     case 10:
       if (yylex_is_member(&yylex_cclass_4, c))
-        next_state = 10;
-      break;
-    case 11:
-      if (yylex_is_member(&yylex_cclass_2, c))
-        next_state = 10;
-      else if (isdigit(c))
         next_state = 12;
       break;
+    case 11:
+      if (yylex_is_member(&yylex_cclass_5, c))
+        next_state = 12;
+      else if (c == 'r')
+        next_state = 13;
+      break;
     case 12:
-      if (yylex_is_member(&yylex_cclass_2, c))
-        next_state = 10;
-      else if (isdigit(c))
+      if (yylex_is_member(&yylex_cclass_4, c))
         next_state = 12;
       break;
     case 13:
-      if (yylex_is_member(&yylex_cclass_6, c))
-        next_state = 10;
-      else if (c == 'l')
-        next_state = 26;
+      if (yylex_is_member(&yylex_cclass_2, c))
+        next_state = 12;
+      else if (isdigit(c))
+        next_state = 14;
       break;
     case 14:
-      if (yylex_is_member(&yylex_cclass_7, c))
-        next_state = 10;
-      else if (c == 'e')
-        next_state = 15;
-      else if (c == 't')
-        next_state = 16;
+      if (yylex_is_member(&yylex_cclass_2, c))
+        next_state = 12;
+      else if (isdigit(c))
+        next_state = 14;
       break;
     case 15:
-      if (yylex_is_member(&yylex_cclass_8, c))
-        next_state = 10;
-      else if (c == 'c')
-        next_state = 21;
+      if (yylex_is_member(&yylex_cclass_6, c))
+        next_state = 12;
+      else if (c == 'l')
+        next_state = 28;
       break;
     case 16:
-      if (yylex_is_member(&yylex_cclass_5, c))
-        next_state = 10;
-      else if (c == 'r')
+      if (yylex_is_member(&yylex_cclass_7, c))
+        next_state = 12;
+      else if (c == 'e')
         next_state = 17;
-      break;
-    case 17:
-      if (yylex_is_member(&yylex_cclass_9, c))
-        next_state = 10;
-      else if (c == 'i')
+      else if (c == 't')
         next_state = 18;
       break;
+    case 17:
+      if (yylex_is_member(&yylex_cclass_8, c))
+        next_state = 12;
+      else if (c == 'c')
+        next_state = 23;
+      break;
     case 18:
-      if (yylex_is_member(&yylex_cclass_10, c))
-        next_state = 10;
-      else if (c == 'n')
+      if (yylex_is_member(&yylex_cclass_5, c))
+        next_state = 12;
+      else if (c == 'r')
         next_state = 19;
       break;
     case 19:
-      if (yylex_is_member(&yylex_cclass_11, c))
-        next_state = 10;
-      else if (c == 'g')
+      if (yylex_is_member(&yylex_cclass_9, c))
+        next_state = 12;
+      else if (c == 'i')
         next_state = 20;
       break;
     case 20:
-      if (yylex_is_member(&yylex_cclass_4, c))
-        next_state = 10;
+      if (yylex_is_member(&yylex_cclass_10, c))
+        next_state = 12;
+      else if (c == 'n')
+        next_state = 21;
       break;
     case 21:
-      if (yylex_is_member(&yylex_cclass_12, c))
-        next_state = 10;
-      else if (c == 't')
+      if (yylex_is_member(&yylex_cclass_11, c))
+        next_state = 12;
+      else if (c == 'g')
         next_state = 22;
       break;
     case 22:
-      if (yylex_is_member(&yylex_cclass_9, c))
-        next_state = 10;
-      else if (c == 'i')
-        next_state = 23;
+      if (yylex_is_member(&yylex_cclass_4, c))
+        next_state = 12;
       break;
     case 23:
-      if (yylex_is_member(&yylex_cclass_13, c))
-        next_state = 10;
-      else if (c == 'o')
+      if (yylex_is_member(&yylex_cclass_12, c))
+        next_state = 12;
+      else if (c == 't')
         next_state = 24;
       break;
     case 24:
-      if (yylex_is_member(&yylex_cclass_10, c))
-        next_state = 10;
-      else if (c == 'n')
+      if (yylex_is_member(&yylex_cclass_9, c))
+        next_state = 12;
+      else if (c == 'i')
         next_state = 25;
       break;
     case 25:
-      if (yylex_is_member(&yylex_cclass_4, c))
-        next_state = 10;
+      if (yylex_is_member(&yylex_cclass_13, c))
+        next_state = 12;
+      else if (c == 'o')
+        next_state = 26;
       break;
     case 26:
-      if (yylex_is_member(&yylex_cclass_13, c))
-        next_state = 10;
-      else if (c == 'o')
+      if (yylex_is_member(&yylex_cclass_10, c))
+        next_state = 12;
+      else if (c == 'n')
         next_state = 27;
       break;
     case 27:
-      if (yylex_is_member(&yylex_cclass_14, c))
-        next_state = 10;
-      else if (c == 'b')
-        next_state = 28;
+      if (yylex_is_member(&yylex_cclass_4, c))
+        next_state = 12;
       break;
     case 28:
-      if (yylex_is_member(&yylex_cclass_15, c))
-        next_state = 10;
-      else if (c == 'a')
+      if (yylex_is_member(&yylex_cclass_13, c))
+        next_state = 12;
+      else if (c == 'o')
         next_state = 29;
-      else if (c == 'l')
-        next_state = 30;
       break;
     case 29:
-      if (yylex_is_member(&yylex_cclass_6, c))
-        next_state = 10;
-      else if (c == 'l')
-        next_state = 31;
+      if (yylex_is_member(&yylex_cclass_14, c))
+        next_state = 12;
+      else if (c == 'b')
+        next_state = 30;
       break;
     case 30:
-      if (yylex_is_member(&yylex_cclass_4, c))
-        next_state = 10;
+      if (yylex_is_member(&yylex_cclass_15, c))
+        next_state = 12;
+      else if (c == 'a')
+        next_state = 31;
+      else if (c == 'l')
+        next_state = 32;
       break;
     case 31:
-      if (yylex_is_member(&yylex_cclass_4, c))
-        next_state = 10;
+      if (yylex_is_member(&yylex_cclass_6, c))
+        next_state = 12;
+      else if (c == 'l')
+        next_state = 33;
       break;
     case 32:
       if (yylex_is_member(&yylex_cclass_4, c))
-        next_state = 34;
+        next_state = 12;
       break;
     case 33:
-      if (isdigit(c))
-        next_state = 33;
+      if (yylex_is_member(&yylex_cclass_4, c))
+        next_state = 12;
       break;
     case 34:
-      if (yylex_is_member(&yylex_cclass_4, c))
-        next_state = 34;
+      if (isdigit(c))
+        next_state = 36;
       break;
     case 35:
-      if (yylex_is_member(&yylex_cclass_1, c))
-        next_state = 35;
-      else if (c == '"')
-        next_state = 36;
-      else if (c == '\\')
+      if (yylex_is_member(&yylex_cclass_4, c))
         next_state = 37;
       break;
+    case 36:
+      if (isdigit(c))
+        next_state = 36;
+      break;
     case 37:
-      if (yylex_is_member(&yylex_cclass_16, c))
-        next_state = 38;
+      if (yylex_is_member(&yylex_cclass_4, c))
+        next_state = 37;
       break;
     case 38:
       if (yylex_is_member(&yylex_cclass_1, c))
-        next_state = 35;
+        next_state = 38;
       else if (c == '"')
-        next_state = 36;
+        next_state = 39;
       else if (c == '\\')
-        next_state = 37;
+        next_state = 40;
+      break;
+    case 40:
+      if (yylex_is_member(&yylex_cclass_16, c))
+        next_state = 41;
+      break;
+    case 41:
+      if (yylex_is_member(&yylex_cclass_1, c))
+        next_state = 38;
+      else if (c == '"')
+        next_state = 39;
+      else if (c == '\\')
+        next_state = 40;
       break;
     } // end switch
     if (((int8_t) next_state) == -1) {

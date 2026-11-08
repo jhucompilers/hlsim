@@ -595,6 +595,16 @@ uint64_t Simulator::load_source( Frame *frame, const Operand &operand, unsigned 
   case OperandKind::VREG_MEMREF:
     val = trim( read_mem( read_vreg( frame, operand.get_vreg() ), operand_size, loc ), operand_size );
     break;
+  case OperandKind::VREG_MEMREF_OFFSET:
+    {
+      // get the address in the vreg
+      uint64_t addr = read_vreg( frame, operand.get_vreg() );
+      // add offset
+      addr = uint64_t( int64_t( addr ) + operand.get_offset() );
+      // read value from memory
+      val = trim( read_mem( addr, operand_size, loc ), operand_size );
+    }
+    break;
   case OperandKind::IMM:
     val = uint64_t( operand.get_imm() );
     break;
@@ -618,6 +628,16 @@ void Simulator::store_dest( Frame *frame, const Operand &operand, unsigned opera
     break;
   case OperandKind::VREG_MEMREF:
     write_mem( read_vreg( frame, operand.get_vreg() ), operand_size, val, loc );
+    break;
+  case OperandKind::VREG_MEMREF_OFFSET:
+    {
+      // get the address in the vreg
+      uint64_t addr = read_vreg( frame, operand.get_vreg() );
+      // add offset
+      addr = uint64_t( int64_t( addr ) + operand.get_offset() );
+      // write the data value to memory
+      write_mem( addr, operand_size, val, loc );
+    }
     break;
   default:
     assert( false );

@@ -24,6 +24,7 @@ enum class OperandKind {
   INVALID,
   VREG,
   VREG_MEMREF,
+  VREG_MEMREF_OFFSET,
   IMM,
   LABEL,
   IMM_LABEL, // immediate label (used only for string constants)
@@ -35,9 +36,10 @@ private:
   OperandKind m_kind;
   int64_t m_ival; // register number or immediate value
   std::string m_label;
+  int32_t m_offset; // used for VREG_MEM_OFFSET operands
 
 public:
-  Operand( OperandKind kind = OperandKind::INVALID, int64_t ival = 0 );
+  Operand( OperandKind kind = OperandKind::INVALID, int64_t ival = 0, int32_t offset = 0 );
   Operand( OperandKind kind, const std::string &label );
   Operand( const Operand &other );
   ~Operand();
@@ -50,6 +52,7 @@ public:
   int64_t get_imm() const;
   bool is_memref() const;
   std::string get_label() const;
+  int32_t get_offset() const;
 
   bool is_assignable() const;
   bool is_readable() const;

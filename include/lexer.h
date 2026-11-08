@@ -36,6 +36,7 @@ enum class TokenKind {
   RPAREN,
   IMMEDIATE,
   IMMEDIATE_LABEL,
+  INT_LITERAL,
   STRING_LITERAL,
 };
 

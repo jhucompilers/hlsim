@@ -1,0 +1,14 @@
+  .section .text
+
+  .globl main
+main:
+  enter $8
+  call read_i32
+  localaddr vr10, $0
+  mov_l 4(vr10), vr0
+  mov_l vr1, 4(vr10)
+  call print_i32
+  call print_nl
+  mov_l vr0, $0
+  leave $8
+  ret

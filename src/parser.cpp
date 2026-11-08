@@ -162,7 +162,8 @@ void Parser::parse_OptOperandList() {
     TokenKind::VREG,
     TokenKind::LPAREN,
     TokenKind::IMMEDIATE,
-    TokenKind::IDENT
+    TokenKind::IDENT,
+    TokenKind::INT_LITERAL,
   };
 
   Token tok;
@@ -187,6 +188,7 @@ void Parser::parse_OperandList() {
 void Parser::parse_Operand() {
   // Operand -> vreg
   // Operand -> '(' vreg ')'
+  // Operand -> int_literal '(' vreg ')'
   // Operand -> imm
   // Operand -> ident
 
@@ -209,6 +211,15 @@ void Parser::parse_Operand() {
     int vreg_num = std::stoi( tok.get_lexeme().substr( 2 ) );
     expect( TokenKind::RPAREN, tok );
     m_cur_ins.append_operand( Operand( OperandKind::VREG_MEMREF, vreg_num ) );
+  } else if ( tok.get_kind() == TokenKind::INT_LITERAL ) {
+    Token offset;
+    expect( TokenKind::INT_LITERAL, offset );
+    expect( TokenKind::LPAREN, tok );
+    expect( TokenKind::VREG, tok );
+    int vreg_num = std::stoi( tok.get_lexeme().substr( 2 ) );
+    expect( TokenKind::RPAREN, tok );
+    int32_t offset_val = std::stoi( offset.get_lexeme() );
+    m_cur_ins.append_operand( Operand( OperandKind::VREG_MEMREF_OFFSET, vreg_num, offset_val ));
   } else if ( tok.get_kind() == TokenKind::IMMEDIATE ) {
     // is an immediate operand
     expect( TokenKind::IMMEDIATE, tok );
