@@ -157,7 +157,7 @@ void Parser::parse_OptOperandList() {
   // OptOperandList -> OperandList
   // OptOperandList -> ε
 
-  // FIRST(OperandList) = { vreg, '(', imm, ident }
+  // FIRST(OperandList) = { vreg, '(', imm, ident, int_literal }
   static const std::set< TokenKind > first_OperandList = {
     TokenKind::VREG,
     TokenKind::LPAREN,
